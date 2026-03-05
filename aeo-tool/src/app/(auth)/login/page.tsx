@@ -3,7 +3,6 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -81,12 +80,13 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center mt-6 text-sm text-[#6b7280]">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-[#2d6a4f] font-semibold hover:underline">
-            Register
-          </Link>
-        </p>
+        <div className="mt-6 p-4 bg-[#f0faf4] rounded-xl">
+          <p className="text-xs text-[#6b7280] text-center">
+            <span className="font-semibold text-[#2d6a4f]">Demo Accounts</span><br />
+            Admin: admin@aeo.com / admin123<br />
+            User: user@aeo.com / user123
+          </p>
+        </div>
       </div>
     </div>
   );

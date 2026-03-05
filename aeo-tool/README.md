@@ -29,6 +29,33 @@ This tool lets you:
 
 ---
 
+## 🔑 Default Login Accounts
+
+The app comes with two pre-configured accounts:
+
+| Role | Email | Password | Permissions |
+|------|-------|----------|-------------|
+| 🔶 **Admin** | `admin@aeo.com` | `admin123` | Full access: API settings, user management, queries |
+| 🔷 **User** | `user@aeo.com` | `user123` | Standard access: API settings, queries |
+
+> **First-time setup:** After deploying, call `POST /api/seed` once to create these default accounts.
+>
+> ```bash
+> curl -X POST https://your-app.vercel.app/api/seed
+> ```
+
+### Admin vs User
+
+| Feature | Admin | User |
+|---------|:-----:|:----:|
+| Create & run queries | ✅ | ✅ |
+| Configure API keys | ✅ | ✅ |
+| Download Excel reports | ✅ | ✅ |
+| Manage users (create/edit/delete) | ✅ | ❌ |
+| Change user roles | ✅ | ❌ |
+
+---
+
 ## 🖥️ Supported AI Platforms
 
 | Platform | API Used | What It Returns |
@@ -83,13 +110,21 @@ NEXTAUTH_URL=http://localhost:3000
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and register your account.
+### 4. Seed Default Accounts
+
+Open your browser or run:
+
+```bash
+curl -X POST http://localhost:3000/api/seed
+```
+
+This creates the default **admin** and **user** accounts. Then log in at [http://localhost:3000](http://localhost:3000).
 
 ---
 
 ## ⚙️ API Keys Setup
 
-After logging in, go to **Settings** to configure your API keys:
+After logging in, go to **API Settings** in the sidebar to configure your API keys:
 
 | Platform | Where to Get the Key |
 |----------|---------------------|
@@ -104,11 +139,26 @@ API keys are stored per-user in MongoDB. You only need keys for the platforms yo
 
 ## 📋 How to Use
 
-1. **Create a New Query** - Give it a title, select target country, enter questions (one per line)
-2. **Select Platforms** - Choose which AI platforms to query
-3. **Run Query** - Click "Run Query" and wait for responses
-4. **View Results** - Expand each question to see responses from all platforms
-5. **Download** - Export as Excel spreadsheet
+1. **Log in** with admin or user credentials
+2. **Configure API keys** in Settings (sidebar)
+3. **Create a New Query** - Title, target country, questions (one per line)
+4. **Select Platforms** - Choose which AI platforms to query
+5. **Run Query** - Click "Run Query" and wait for responses
+6. **View Results** - Expand each question to see responses from all platforms
+7. **Download** - Export as Excel spreadsheet
+
+---
+
+## 👤 User Management (Admin Only)
+
+Admins can manage users from the **Users** page in the sidebar:
+
+- **Create new users** with name, email, password, and role
+- **Edit users** - change name, email, password, or role
+- **Delete users** - remove user accounts
+- **Assign roles** - promote users to admin or demote to regular user
+
+> Registration is disabled for public access. Only admins can create new user accounts.
 
 ---
 
@@ -118,15 +168,16 @@ API keys are stored per-user in MongoDB. You only need keys for the platforms yo
 aeo-tool/
 ├── src/
 │   ├── app/
-│   │   ├── (auth)/           # Login & Register pages
-│   │   ├── (dashboard)/      # Dashboard, Settings, Query pages
-│   │   └── api/              # API routes
+│   │   ├── (auth)/           # Login page
+│   │   ├── (dashboard)/      # Dashboard, Settings, Query, Admin pages
+│   │   └── api/
 │   │       ├── auth/         # NextAuth endpoints
-│   │       ├── register/     # User registration
+│   │       ├── seed/         # Seed default accounts
+│   │       ├── admin/users/  # Admin user management CRUD
 │   │       ├── settings/     # API key management
 │   │       └── queries/      # Query CRUD + run + download
 │   ├── components/           # Sidebar & shared components
-│   ├── lib/                  # MongoDB connection, Auth config, Countries
+│   ├── lib/                  # MongoDB, Auth, Countries list
 │   ├── models/               # Mongoose schemas (User, Query)
 │   ├── providers/            # AI platform API integrations
 │   └── types/                # TypeScript type augmentations
@@ -147,15 +198,21 @@ aeo-tool/
    - `NEXTAUTH_SECRET` - A random secret string
    - `NEXTAUTH_URL` - Your Vercel deployment URL
 5. Deploy!
+6. **After first deploy**, seed default accounts:
+   ```bash
+   curl -X POST https://your-app.vercel.app/api/seed
+   ```
 
 ---
 
 ## 🔒 Security
 
 - Passwords are hashed with **bcrypt** (12 rounds)
-- API keys are stored encrypted per-user in MongoDB
+- API keys are stored per-user in MongoDB
 - Session management via **NextAuth.js** with JWT strategy
 - All API routes require authentication
+- Admin routes verify admin role server-side
+- Registration is disabled - only admins can create users
 
 ---
 
