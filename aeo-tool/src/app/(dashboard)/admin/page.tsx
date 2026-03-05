@@ -12,6 +12,13 @@ interface UserItem {
   createdAt: string;
 }
 
+const PROVIDERS = [
+  { key: "openai", label: "ChatGPT (OpenAI)", color: "#2e7d32", bg: "#e8f5e9" },
+  { key: "gemini", label: "Gemini (Google)", color: "#1565c0", bg: "#e3f2fd" },
+  { key: "perplexity", label: "Perplexity", color: "#7b1fa2", bg: "#f3e5f5" },
+  { key: "serpapi", label: "Google AI Overview (SerpAPI)", color: "#e65100", bg: "#fff3e0" },
+];
+
 export default function AdminPage() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -22,6 +29,13 @@ export default function AdminPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "user" });
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // API Keys state
+  const [apiKeysUser, setApiKeysUser] = useState<UserItem | null>(null);
+  const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
+  const [apiKeysLoading, setApiKeysLoading] = useState(false);
+  const [apiKeysSaving, setApiKeysSaving] = useState(false);
+  const [apiKeysSaved, setApiKeysSaved] = useState(false);
 
   useEffect(() => {
     if (session && session.user.role !== "admin") {
@@ -45,6 +59,7 @@ export default function AdminPage() {
     setForm({ name: "", email: "", password: "", role: "user" });
     setError("");
     setShowForm(true);
+    setApiKeysUser(null);
   };
 
   const openEditForm = (user: UserItem) => {
@@ -52,6 +67,7 @@ export default function AdminPage() {
     setForm({ name: user.name, email: user.email, password: "", role: user.role });
     setError("");
     setShowForm(true);
+    setApiKeysUser(null);
   };
 
   const handleSave = async () => {
@@ -91,17 +107,43 @@ export default function AdminPage() {
     });
     const data = await res.json();
     if (!res.ok) { alert(data.error); return; }
+    if (apiKeysUser?.id === id) setApiKeysUser(null);
     fetchUsers();
+  };
+
+  const openApiKeys = async (user: UserItem) => {
+    setShowForm(false);
+    setApiKeysUser(user);
+    setApiKeysLoading(true);
+    setApiKeysSaved(false);
+    const res = await fetch(`/api/admin/apikeys?userId=${user.id}`);
+    const data = await res.json();
+    setApiKeys(data.apiKeys || {});
+    setApiKeysLoading(false);
+  };
+
+  const saveApiKeys = async () => {
+    if (!apiKeysUser) return;
+    setApiKeysSaving(true);
+    setApiKeysSaved(false);
+    await fetch("/api/admin/apikeys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: apiKeysUser.id, apiKeys }),
+    });
+    setApiKeysSaving(false);
+    setApiKeysSaved(true);
+    setTimeout(() => setApiKeysSaved(false), 3000);
   };
 
   if (session?.user.role !== "admin") return null;
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[#1b4332]">User Management</h1>
-          <p className="text-[#6b7280] mt-1">Manage users and their roles</p>
+          <h1 className="text-3xl font-bold text-[#1b4332]">Admin Panel</h1>
+          <p className="text-[#6b7280] mt-1">Manage users, roles, and API keys</p>
         </div>
         <button onClick={openCreateForm} className="btn-primary">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -114,7 +156,7 @@ export default function AdminPage() {
         </button>
       </div>
 
-      {/* Create/Edit Form Modal */}
+      {/* Create/Edit User Form */}
       {showForm && (
         <div className="card p-6 mb-6 border-2 border-[#52b788]">
           <h3 className="text-lg font-semibold text-[#1b4332] mb-4">
@@ -179,6 +221,78 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* API Keys Panel */}
+      {apiKeysUser && (
+        <div className="card p-6 mb-6 border-2 border-[#e65100]">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-[#1b4332]">
+                API Keys for {apiKeysUser.name}
+              </h3>
+              <p className="text-sm text-[#6b7280]">{apiKeysUser.email}</p>
+            </div>
+            <button
+              onClick={() => setApiKeysUser(null)}
+              className="text-[#6b7280] hover:text-[#1b4332] transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+
+          {apiKeysLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-12 bg-[#d8f3dc] rounded animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="space-y-3">
+                {PROVIDERS.map((p) => (
+                  <div key={p.key} className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 w-56 flex-shrink-0">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} />
+                      <span className="text-sm font-medium text-[#1b4332]">{p.label}</span>
+                      <span
+                        className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
+                        style={{ backgroundColor: p.bg, color: p.color }}
+                      >
+                        {apiKeys[p.key] ? "Set" : "Empty"}
+                      </span>
+                    </div>
+                    <input
+                      type="password"
+                      value={apiKeys[p.key] || ""}
+                      onChange={(e) => setApiKeys((prev) => ({ ...prev, [p.key]: e.target.value }))}
+                      className="input-field flex-1"
+                      placeholder={`Enter ${p.label} API key`}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-4 mt-4">
+                <button onClick={saveApiKeys} disabled={apiKeysSaving} className="btn-primary">
+                  {apiKeysSaving ? (
+                    <span className="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                  ) : "Save API Keys"}
+                </button>
+                {apiKeysSaved && (
+                  <span className="text-[#40916c] font-medium flex items-center gap-1 text-sm">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    Saved
+                  </span>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Users Table */}
       {loading ? (
         <div className="card p-6 animate-pulse space-y-4">
@@ -217,6 +331,12 @@ export default function AdminPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={() => openApiKeys(u)}
+                        className="text-sm px-3 py-1 rounded-lg bg-[#fff3e0] text-[#e65100] hover:bg-[#ffe0b2] transition-colors font-medium"
+                      >
+                        API Keys
+                      </button>
                       <button
                         onClick={() => openEditForm(u)}
                         className="text-sm px-3 py-1 rounded-lg bg-[#d8f3dc] text-[#2d6a4f] hover:bg-[#b7e4c7] transition-colors font-medium"

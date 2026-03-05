@@ -20,7 +20,16 @@ export async function GET() {
     const val = v as string;
     masked[k] = val ? val.slice(0, 8) + "..." + val.slice(-4) : "";
   }
-  return NextResponse.json({ apiKeys: masked });
+  // Check which providers have admin fallback keys
+  const adminAvailable: Record<string, boolean> = {};
+  const admins = await User.find({ role: "admin" }).select("apiKeys");
+  for (const provider of ["openai", "gemini", "perplexity", "serpapi"]) {
+    adminAvailable[provider] = admins.some(
+      (a) => !!a.apiKeys?.[provider as keyof typeof a.apiKeys]
+    );
+  }
+
+  return NextResponse.json({ apiKeys: masked, adminAvailable });
 }
 
 export async function POST(req: NextRequest) {

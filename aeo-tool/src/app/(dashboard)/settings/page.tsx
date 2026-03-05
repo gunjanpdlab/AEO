@@ -11,6 +11,7 @@ const PROVIDERS = [
 
 export default function SettingsPage() {
   const [keys, setKeys] = useState<Record<string, string>>({});
+  const [adminAvailable, setAdminAvailable] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -20,6 +21,7 @@ export default function SettingsPage() {
       .then((r) => r.json())
       .then((data) => {
         setKeys(data.apiKeys || {});
+        setAdminAvailable(data.adminAvailable || {});
         setLoading(false);
       });
   }, []);
@@ -40,7 +42,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-3xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#1b4332]">Settings</h1>
+        <h1 className="text-3xl font-bold text-[#1b4332]">API Settings</h1>
         <p className="text-[#6b7280] mt-1">Configure your API keys for each AI platform</p>
       </div>
 
@@ -56,25 +58,44 @@ export default function SettingsPage() {
       ) : (
         <>
           <div className="space-y-4">
-            {PROVIDERS.map((p) => (
-              <div key={p.key} className="card p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: p.color }} />
-                  <h3 className="font-semibold text-[#1b4332]">{p.label}</h3>
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: p.bg, color: p.color }}>
-                    {keys[p.key] ? "Configured" : "Not Set"}
-                  </span>
+            {PROVIDERS.map((p) => {
+              const hasOwn = !!keys[p.key];
+              const hasAdmin = !!adminAvailable[p.key];
+              return (
+                <div key={p.key} className="card p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: p.color }} />
+                    <h3 className="font-semibold text-[#1b4332]">{p.label}</h3>
+                    {hasOwn ? (
+                      <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: p.bg, color: p.color }}>
+                        Your Key
+                      </span>
+                    ) : hasAdmin ? (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-[#d8f3dc] text-[#2d6a4f]">
+                        Available (admin)
+                      </span>
+                    ) : (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                        Not Set
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-[#6b7280] mb-3">
+                    {p.description}
+                    {!hasOwn && hasAdmin && (
+                      <span className="text-[#2d6a4f]"> &mdash; Using admin-provided key. Add your own to override.</span>
+                    )}
+                  </p>
+                  <input
+                    type="password"
+                    value={keys[p.key] || ""}
+                    onChange={(e) => setKeys((prev) => ({ ...prev, [p.key]: e.target.value }))}
+                    className="input-field"
+                    placeholder={hasAdmin && !hasOwn ? "Optional - admin key will be used" : `Enter your ${p.label} API key`}
+                  />
                 </div>
-                <p className="text-sm text-[#6b7280] mb-3">{p.description}</p>
-                <input
-                  type="password"
-                  value={keys[p.key] || ""}
-                  onChange={(e) => setKeys((prev) => ({ ...prev, [p.key]: e.target.value }))}
-                  className="input-field"
-                  placeholder={`Enter your ${p.label} API key`}
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-6 flex items-center gap-4">

@@ -44,7 +44,30 @@ export async function POST(
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  const apiKeys = user.apiKeys || {};
+  // Resolve API keys: user's own key first, fallback to any admin's key
+  const userKeys = user.apiKeys || {};
+  const resolvedKeys: Record<string, string> = {};
+  for (const provider of ["openai", "gemini", "perplexity", "serpapi"]) {
+    const userKey = userKeys[provider as keyof typeof userKeys];
+    if (userKey) {
+      resolvedKeys[provider] = userKey;
+    }
+  }
+  // Fill missing keys from admin accounts
+  const missingProviders = selectedProviders.filter((p: string) => !resolvedKeys[p]);
+  if (missingProviders.length > 0) {
+    const admins = await User.find({ role: "admin" }).select("apiKeys");
+    for (const provider of missingProviders) {
+      for (const admin of admins) {
+        const adminKey = admin.apiKeys?.[provider as keyof typeof admin.apiKeys];
+        if (adminKey) {
+          resolvedKeys[provider] = adminKey;
+          break;
+        }
+      }
+    }
+  }
+
   query.status = "running";
 
   // Process each question
@@ -58,7 +81,7 @@ export async function POST(
 
     // Add pending responses
     for (const provider of selectedProviders) {
-      if (apiKeys[provider as keyof typeof apiKeys]) {
+      if (resolvedKeys[provider]) {
         question.responses.push({
           provider,
           text: "",
@@ -76,7 +99,7 @@ export async function POST(
     const question = query.questions[qi];
 
     for (const provider of selectedProviders) {
-      const key = apiKeys[provider as keyof typeof apiKeys];
+      const key = resolvedKeys[provider];
       const fn = PROVIDER_FNS[provider];
       if (!key || !fn) continue;
 
