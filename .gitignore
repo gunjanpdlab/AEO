@@ -1,0 +1,19 @@
+# Example PDFs
+*.pdf
+
+# dependencies
+aeo-tool/node_modules/
+
+# next.js
+aeo-tool/.next/
+aeo-tool/out/
+
+# env files
+.env
+.env*.local
+aeo-tool/.env
+aeo-tool/.env*.local
+
+# misc
+.DS_Store
+*.pem
