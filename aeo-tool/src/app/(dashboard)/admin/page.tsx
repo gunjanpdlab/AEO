@@ -36,6 +36,8 @@ export default function AdminPage() {
   const [apiKeysLoading, setApiKeysLoading] = useState(false);
   const [apiKeysSaving, setApiKeysSaving] = useState(false);
   const [apiKeysSaved, setApiKeysSaved] = useState(false);
+  const [validating, setValidating] = useState(false);
+  const [validationResults, setValidationResults] = useState<Record<string, { ok: boolean; error?: string }>>({});
 
   useEffect(() => {
     if (session && session.user.role !== "admin") {
@@ -116,6 +118,7 @@ export default function AdminPage() {
     setApiKeysUser(user);
     setApiKeysLoading(true);
     setApiKeysSaved(false);
+    setValidationResults({});
     const res = await fetch(`/api/admin/apikeys?userId=${user.id}`);
     const data = await res.json();
     setApiKeys(data.apiKeys || {});
@@ -134,6 +137,20 @@ export default function AdminPage() {
     setApiKeysSaving(false);
     setApiKeysSaved(true);
     setTimeout(() => setApiKeysSaved(false), 3000);
+  };
+
+  const validateApiKeys = async () => {
+    if (!apiKeysUser) return;
+    setValidating(true);
+    setValidationResults({});
+    const res = await fetch("/api/admin/apikeys/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: apiKeysUser.id }),
+    });
+    const data = await res.json();
+    setValidationResults(data.results || {});
+    setValidating(false);
   };
 
   if (session?.user.role !== "admin") return null;
@@ -251,33 +268,76 @@ export default function AdminPage() {
           ) : (
             <>
               <div className="space-y-3">
-                {PROVIDERS.map((p) => (
-                  <div key={p.key} className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 w-56 flex-shrink-0">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} />
-                      <span className="text-sm font-medium text-[#1b4332]">{p.label}</span>
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
-                        style={{ backgroundColor: p.bg, color: p.color }}
-                      >
-                        {apiKeys[p.key] ? "Set" : "Empty"}
-                      </span>
+                {PROVIDERS.map((p) => {
+                  const result = validationResults[p.key];
+                  return (
+                    <div key={p.key}>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 w-56 flex-shrink-0">
+                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} />
+                          <span className="text-sm font-medium text-[#1b4332]">{p.label}</span>
+                          {apiKeys[p.key] ? (
+                            result ? (
+                              result.ok ? (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-[#d8f3dc] text-[#2d6a4f]">
+                                  Working
+                                </span>
+                              ) : (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-[#fecaca] text-[#991b1b]">
+                                  Failed
+                                </span>
+                              )
+                            ) : (
+                              <span
+                                className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
+                                style={{ backgroundColor: p.bg, color: p.color }}
+                              >
+                                Set
+                              </span>
+                            )
+                          ) : (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-gray-100 text-gray-500">
+                              Empty
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          type="password"
+                          value={apiKeys[p.key] || ""}
+                          onChange={(e) => setApiKeys((prev) => ({ ...prev, [p.key]: e.target.value }))}
+                          className="input-field flex-1"
+                          placeholder={`Enter ${p.label} API key`}
+                        />
+                      </div>
+                      {result && !result.ok && result.error !== "No key configured" && (
+                        <p className="text-xs text-[#991b1b] mt-1 ml-[232px]">
+                          Error: {result.error}
+                        </p>
+                      )}
                     </div>
-                    <input
-                      type="password"
-                      value={apiKeys[p.key] || ""}
-                      onChange={(e) => setApiKeys((prev) => ({ ...prev, [p.key]: e.target.value }))}
-                      className="input-field flex-1"
-                      placeholder={`Enter ${p.label} API key`}
-                    />
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-              <div className="flex items-center gap-4 mt-4">
+              <div className="flex items-center gap-3 mt-4">
                 <button onClick={saveApiKeys} disabled={apiKeysSaving} className="btn-primary">
                   {apiKeysSaving ? (
                     <span className="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
                   ) : "Save API Keys"}
+                </button>
+                <button onClick={validateApiKeys} disabled={validating} className="btn-secondary">
+                  {validating ? (
+                    <>
+                      <span className="animate-spin inline-block w-4 h-4 border-2 border-[#2d6a4f] border-t-transparent rounded-full" />
+                      Validating...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Validate Keys
+                    </>
+                  )}
                 </button>
                 {apiKeysSaved && (
                   <span className="text-[#40916c] font-medium flex items-center gap-1 text-sm">
