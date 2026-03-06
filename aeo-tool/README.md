@@ -21,11 +21,12 @@
 **AI Engine Optimization (AEO)** is the practice of understanding and optimizing how AI platforms (ChatGPT, Gemini, Perplexity, Google AI Overviews) answer questions about your brand, products, or industry.
 
 This tool lets you:
-- 📝 **Input questions** you want to audit
+- 📝 **Input questions** you want to audit (type manually or upload CSV/Excel)
 - 🌍 **Select a target geography** (45+ countries supported)
 - 🤖 **Query 4 AI platforms** simultaneously
 - 📊 **Compare responses** side-by-side
 - 📥 **Download reports** as Excel spreadsheets
+- 🔑 **Validate API keys** directly from the settings page
 
 ---
 
@@ -141,11 +142,44 @@ API keys are stored per-user in MongoDB. You only need keys for the platforms yo
 
 1. **Log in** with admin or user credentials
 2. **Configure API keys** in Settings (sidebar)
-3. **Create a New Query** - Title, target country, questions (one per line)
-4. **Select Platforms** - Choose which AI platforms to query
-5. **Run Query** - Click "Run Query" and wait for responses
-6. **View Results** - Expand each question to see responses from all platforms
-7. **Download** - Export as Excel spreadsheet
+3. **Validate API keys** - Click "Validate Keys" in Settings to test each key is working
+4. **Create a New Query** - Title, target country, questions (one per line or upload CSV/Excel)
+5. **Select Platforms** - Choose which AI platforms to query
+6. **Run Query** - Click "Run Query" and wait for responses
+7. **View Results** - Expand each question to see responses from all platforms
+8. **Download** - Export as Excel spreadsheet
+
+---
+
+## 📤 Bulk Question Upload
+
+You can upload questions in bulk using CSV or Excel files instead of typing them manually:
+
+- **Supported formats**: `.csv`, `.xlsx`, `.xls`
+- **Format**: Questions should be in the **first column** of the file
+- **Header row**: Automatically skipped if detected (e.g., "Question", "Query", "Text")
+- **Duplicates**: Automatically removed during import
+- **Append mode**: Uploaded questions are added to any existing questions in the text area
+
+### Example CSV format:
+```csv
+Question
+What is the best laptop for programming?
+How do I learn Python?
+What are the top AI tools for business?
+```
+
+---
+
+## 🔑 API Key Validation
+
+Each user can validate their API keys directly from the **API Settings** page:
+
+- Click **"Validate Keys"** to test all configured keys at once
+- Each provider shows a **Working** (green) or **Failed** (red) badge
+- Hover over a failed badge to see the error details
+- Keys are tested against each provider's actual API endpoint
+- Validates: OpenAI, Gemini, Perplexity, and SerpAPI keys
 
 ---
 

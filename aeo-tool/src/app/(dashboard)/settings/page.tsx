@@ -15,6 +15,8 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [validating, setValidating] = useState(false);
+  const [validationResults, setValidationResults] = useState<Record<string, { ok: boolean; error?: string }>>({});
 
   useEffect(() => {
     fetch("/api/settings")
@@ -37,6 +39,21 @@ export default function SettingsPage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  };
+
+  const handleValidate = async () => {
+    setValidating(true);
+    setValidationResults({});
+    try {
+      const res = await fetch("/api/settings/validate", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setValidationResults(data.results || {});
+      }
+    } catch {
+      // ignore
+    }
+    setValidating(false);
   };
 
   return (
@@ -79,6 +96,19 @@ export default function SettingsPage() {
                         Not Set
                       </span>
                     )}
+                    {validationResults[p.key] && (
+                      validationResults[p.key].ok ? (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 flex items-center gap-1">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                          Working
+                        </span>
+                      ) : (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 flex items-center gap-1" title={validationResults[p.key].error}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                          Failed
+                        </span>
+                      )
+                    )}
                   </div>
                   <p className="text-sm text-[#6b7280] mb-3">
                     {p.description}
@@ -105,6 +135,22 @@ export default function SettingsPage() {
               ) : (
                 "Save Settings"
               )}
+            </button>
+            <button
+              type="button"
+              onClick={handleValidate}
+              disabled={validating}
+              className="px-4 py-2.5 rounded-lg border-2 border-[#b7e4c7] text-[#2d6a4f] font-semibold hover:bg-[#d8f3dc] transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              {validating ? (
+                <span className="animate-spin inline-block w-5 h-5 border-2 border-[#2d6a4f] border-t-transparent rounded-full" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 12l2 2 4-4" />
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+              )}
+              Validate Keys
             </button>
             {saved && (
               <span className="text-[#40916c] font-medium flex items-center gap-1">

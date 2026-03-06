@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { COUNTRIES } from "@/lib/countries";
 
@@ -12,6 +12,8 @@ export default function NewQueryPage() {
   const [questionsText, setQuestionsText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCountryChange = (code: string) => {
     const c = COUNTRIES.find((c) => c.code === code);
@@ -43,6 +45,30 @@ export default function NewQueryPage() {
     } else {
       setError(data.error || "Failed to create query");
     }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError("");
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/queries/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to parse file");
+      } else {
+        const existing = questionsText.trim();
+        const newQuestions = data.questions.join("\n");
+        setQuestionsText(existing ? existing + "\n" + newQuestions : newQuestions);
+      }
+    } catch {
+      setError("Failed to upload file");
+    }
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const questionCount = questionsText
@@ -92,18 +118,44 @@ export default function NewQueryPage() {
         <div className="card p-6">
           <div className="flex items-center justify-between mb-2">
             <label className="block text-sm font-semibold text-[#1b4332]">Questions</label>
-            <span className="text-xs text-[#6b7280] px-2 py-1 bg-[#d8f3dc] rounded-full">
-              {questionCount} question{questionCount !== 1 ? "s" : ""}
-            </span>
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="text-xs px-3 py-1.5 rounded-lg border border-[#b7e4c7] text-[#2d6a4f] hover:bg-[#d8f3dc] transition-colors flex items-center gap-1.5 font-medium cursor-pointer"
+              >
+                {uploading ? (
+                  <span className="animate-spin inline-block w-3 h-3 border-2 border-[#2d6a4f] border-t-transparent rounded-full" />
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                )}
+                Upload CSV / Excel
+              </button>
+              <span className="text-xs text-[#6b7280] px-2 py-1 bg-[#d8f3dc] rounded-full">
+                {questionCount} question{questionCount !== 1 ? "s" : ""}
+              </span>
+            </div>
           </div>
           <textarea
             value={questionsText}
             onChange={(e) => setQuestionsText(e.target.value)}
             className="input-field min-h-[300px] font-mono text-sm"
-            placeholder={`Enter one question per line, e.g.:\n\nIs it normal for Toyota parts to cost different amounts at different Toyota dealers?\nWhy doesn't Toyota show a single national price for parts on autoparts.toyota.com?\nHow do I find the cheapest Toyota dealer for the same OEM part online?`}
+            placeholder={`Enter one question per line, e.g.:\n\nIs it normal for Toyota parts to cost different amounts at different Toyota dealers?\nWhy doesn't Toyota show a single national price for parts on autoparts.toyota.com?\nHow do I find the cheapest Toyota dealer for the same OEM part online?\n\nOr upload a CSV/Excel file with questions in the first column.`}
             required
           />
-          <p className="text-xs text-[#6b7280] mt-2">One question per line. Each question will be sent to all selected AI platforms.</p>
+          <p className="text-xs text-[#6b7280] mt-2">One question per line, or upload a CSV/Excel file with questions in the first column.</p>
         </div>
 
         <button type="submit" disabled={loading} className="btn-primary">
