@@ -247,6 +247,7 @@ aeo-tool/
 - All API routes require authentication
 - Admin routes verify admin role server-side
 - Registration is disabled - only admins can create users
+- `robots.txt` blocks all search engine crawlers
 
 ---
 
