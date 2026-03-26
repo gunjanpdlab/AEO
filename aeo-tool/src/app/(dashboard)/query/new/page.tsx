@@ -9,6 +9,9 @@ export default function NewQueryPage() {
   const [title, setTitle] = useState("");
   const [country, setCountry] = useState("United States");
   const [countryCode, setCountryCode] = useState("us");
+  const [clientName, setClientName] = useState("");
+  const [clientBrandsText, setClientBrandsText] = useState("");
+  const [competitorBrandsText, setCompetitorBrandsText] = useState("");
   const [questionsText, setQuestionsText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -36,7 +39,12 @@ export default function NewQueryPage() {
     const res = await fetch("/api/queries", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, country, countryCode, questions }),
+      body: JSON.stringify({
+        title, country, countryCode, questions,
+        clientName,
+        clientBrands: clientBrandsText.split(',').map(b => b.trim()).filter(Boolean),
+        competitorBrands: competitorBrandsText.split(',').map(b => b.trim()).filter(Boolean),
+      }),
     });
     const data = await res.json();
     setLoading(false);
@@ -112,6 +120,45 @@ export default function NewQueryPage() {
           </select>
           <p className="text-xs text-[#6b7280] mt-2">
             Responses will be tailored to this country. SerpAPI will use the corresponding region code.
+          </p>
+        </div>
+
+        <div className="card p-6">
+          <label className="block text-sm font-semibold text-[#1b4332] mb-4">Brand Configuration</label>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-[#6b7280] mb-1">Client Name</label>
+              <input
+                type="text"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                className="input-field"
+                placeholder="e.g., PeopleConnect"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[#6b7280] mb-1">Client Brands (comma-separated)</label>
+              <input
+                type="text"
+                value={clientBrandsText}
+                onChange={(e) => setClientBrandsText(e.target.value)}
+                className="input-field"
+                placeholder="e.g., TruthFinder, Instant Checkmate, Intelius"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[#6b7280] mb-1">Competitor Brands (comma-separated)</label>
+              <input
+                type="text"
+                value={competitorBrandsText}
+                onChange={(e) => setCompetitorBrandsText(e.target.value)}
+                className="input-field"
+                placeholder="e.g., Whitepages, BeenVerified, Spokeo"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-[#6b7280] mt-2">
+            These brands will be tracked in the AEO analysis. You can leave this blank and set it later.
           </p>
         </div>
 

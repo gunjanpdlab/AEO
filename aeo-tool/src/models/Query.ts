@@ -17,6 +17,9 @@ export interface IQuery extends Document {
   title: string;
   country: string;
   countryCode: string;
+  clientName: string;
+  clientBrands: string[];
+  competitorBrands: string[];
   questions: IQuestion[];
   status: "draft" | "running" | "completed";
   createdAt: Date;
@@ -39,6 +42,9 @@ const QuerySchema = new Schema<IQuery>({
   title: { type: String, required: true },
   country: { type: String, default: "United States" },
   countryCode: { type: String, default: "us" },
+  clientName: { type: String, default: "" },
+  clientBrands: { type: [String], default: [] },
+  competitorBrands: { type: [String], default: [] },
   questions: [QuestionSchema],
   status: { type: String, enum: ["draft", "running", "completed"], default: "draft" },
   createdAt: { type: Date, default: Date.now },

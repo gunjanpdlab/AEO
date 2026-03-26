@@ -35,6 +35,9 @@ interface QueryData {
   title: string;
   country: string;
   countryCode: string;
+  clientName: string;
+  clientBrands: string[];
+  competitorBrands: string[];
   status: string;
   questions: Question[];
   createdAt: string;
@@ -140,6 +143,16 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
               {query.status}
             </span>
           </div>
+          {query.clientBrands?.length > 0 && (
+            <div className="flex gap-3 mt-2 text-xs">
+              <span className="px-2 py-1 bg-[#d6e4f0] text-[#2F5496] rounded font-medium">
+                {query.clientName || 'Client'}: {query.clientBrands.join(', ')}
+              </span>
+              <span className="px-2 py-1 bg-[#fce4d6] text-[#C55A11] rounded font-medium">
+                Competitors: {query.competitorBrands?.join(', ')}
+              </span>
+            </div>
+          )}
         </div>
 
         {hasResults && (
@@ -150,6 +163,17 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
               </svg>
               Excel
             </button>
+            {query && query.clientBrands?.length > 0 && query.competitorBrands?.length > 0 && (
+              <Link
+                href={`/query/${id}/analysis`}
+                className="text-sm px-4 py-2 rounded-lg bg-[#2F5496] text-white hover:bg-[#1F3864] transition-colors font-medium inline-flex items-center gap-2"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 21H4.6c-.56 0-.84 0-1.05-.11a1 1 0 01-.44-.44C3 20.24 3 19.96 3 19.4V3M7 14l4-4 4 4 6-6" />
+                </svg>
+                Analyze
+              </Link>
+            )}
           </div>
         )}
       </div>

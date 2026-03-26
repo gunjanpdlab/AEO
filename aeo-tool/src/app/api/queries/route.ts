@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { title, country, countryCode, questions } = await req.json();
+  const { title, country, countryCode, questions, clientName, clientBrands, competitorBrands } = await req.json();
   if (!title || !questions || questions.length === 0) {
     return NextResponse.json({ error: "Title and questions are required" }, { status: 400 });
   }
@@ -38,6 +38,9 @@ export async function POST(req: NextRequest) {
     title,
     country: country || "United States",
     countryCode: countryCode || "us",
+    clientName: clientName || "",
+    clientBrands: clientBrands || [],
+    competitorBrands: competitorBrands || [],
     questions: questions.map((q: string) => ({ text: q, responses: [] })),
     status: "draft",
   });
