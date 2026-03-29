@@ -106,7 +106,7 @@ export async function queryGoogleAIO(
     const data = await resp.json();
 
     const aio = data.ai_overview;
-    if (!aio) return "[No AI Overview available for this query in this region]";
+    if (!aio) return "[No AI Overview available] Google does not generate an AI Overview for every search query. This is common for region-specific, niche, or finance-related queries. The AI Overview feature depends on the query type, language, and country. This does not indicate an error — it simply means Google chose not to display an AI-generated summary for this particular search.";
 
     const parts: string[] = [];
     const textBlocks = aio.text_blocks || [];
@@ -128,6 +128,6 @@ export async function queryGoogleAIO(
         parts.push(`[${i + 1}] ${ref.title || ""} (${ref.source || ""}) - ${ref.link || ""}`);
       });
     }
-    return parts.join("\n\n") || "[AI Overview returned empty content]";
+    return parts.join("\n\n") || "[AI Overview returned empty content] Google generated an AI Overview for this query but it contained no extractable text. This can happen when the overview uses visual elements or formats that cannot be parsed as text.";
   });
 }
