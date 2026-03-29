@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
+import { getFlag } from "@/lib/countries";
 
 const PROVIDER_LABELS: Record<string, string> = {
   openai: "ChatGPT (OpenAI)",
@@ -66,6 +67,13 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
     fetchQuery();
   }, [id]);
 
+  // Poll for updates while query is running
+  useEffect(() => {
+    if (!query || query.status !== "running") return;
+    const interval = setInterval(fetchQuery, 3000);
+    return () => clearInterval(interval);
+  }, [query?.status]);
+
   const toggleProvider = (p: string) => {
     setSelectedProviders((prev) =>
       prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
@@ -128,11 +136,7 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
           <h1 className="text-3xl font-bold text-[#1b4332] mt-1">{query.title}</h1>
           <div className="flex items-center gap-4 mt-2 text-sm text-[#6b7280]">
             <span className="flex items-center gap-1">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M2 12h20" />
-              </svg>
-              {query.country}
+              {getFlag(query.countryCode)} {query.country}
             </span>
             <span>{query.questions.length} questions</span>
             <span>{new Date(query.createdAt).toLocaleDateString()}</span>

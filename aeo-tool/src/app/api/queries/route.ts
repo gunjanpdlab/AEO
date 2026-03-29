@@ -10,12 +10,13 @@ export async function GET() {
   }
   await dbConnect();
   const queries = await Query.find({ userId: session.user.id })
-    .select("title country status createdAt questions")
+    .select("title country countryCode status createdAt questions")
     .sort({ createdAt: -1 });
   const result = queries.map((q) => ({
     id: q._id.toString(),
     title: q.title,
     country: q.country,
+    countryCode: q.countryCode || "us",
     status: q.status,
     questionCount: q.questions.length,
     createdAt: q.createdAt,

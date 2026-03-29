@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { COUNTRIES, getFlag } from "@/lib/countries";
 
 interface BrandMetric {
   name: string;
@@ -147,9 +148,21 @@ export default function AnalysisPage() {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <div className="animate-spin inline-block w-10 h-10 border-4 border-[#2d6a4f] border-t-transparent rounded-full mb-4" />
-          <p className="text-[#6b7280]">Analyzing responses...</p>
-          <p className="text-xs text-[#9ca3af] mt-1">This may take a moment while charts are generated</p>
+          <div className="relative inline-block mb-6">
+            <div className="animate-spin w-16 h-16 border-4 border-[#d8f3dc] border-t-[#2d6a4f] rounded-full" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" strokeWidth="2">
+                <path d="M21 21H4.6c-.56 0-.84 0-1.05-.11a1 1 0 01-.44-.44C3 20.24 3 19.96 3 19.4V3M7 14l4-4 4 4 6-6" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-lg font-semibold text-[#1b4332]">Analyzing responses...</p>
+          <p className="text-sm text-[#6b7280] mt-2">Parsing brand mentions, generating charts, and computing metrics</p>
+          <div className="flex justify-center gap-1 mt-4">
+            <div className="w-2 h-2 bg-[#2d6a4f] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+            <div className="w-2 h-2 bg-[#40916c] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+            <div className="w-2 h-2 bg-[#52b788] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          </div>
         </div>
       </div>
     );
@@ -191,7 +204,7 @@ export default function AnalysisPage() {
           </Link>
           <h1 className="text-2xl font-bold text-[#1b4332]">{config.clientName} AEO Analysis</h1>
           <p className="text-sm text-[#6b7280] mt-1">
-            {config.queryTitle} | {config.platform} | {config.country} | {config.date} | {config.totalQuestions} Queries
+            {config.queryTitle} | {config.platform} | {getFlag(COUNTRIES.find(c => c.name === config.country)?.code || "us")} {config.country} | {config.date} | {config.totalQuestions} Queries
           </p>
           <div className="flex gap-4 mt-2 text-xs">
             <span className="px-2 py-1 bg-[#d6e4f0] text-[#2F5496] rounded font-medium">
@@ -454,7 +467,7 @@ export default function AnalysisPage() {
 
       {/* Footer */}
       <div className="text-center text-xs text-[#9ca3af] pb-8">
-        Source: {config.platform} | {config.country} | {config.date} | {config.totalQuestions} Queries Analyzed
+        Source: {config.platform} | {getFlag(COUNTRIES.find(c => c.name === config.country)?.code || "us")} {config.country} | {config.date} | {config.totalQuestions} Queries Analyzed
       </div>
     </div>
   );

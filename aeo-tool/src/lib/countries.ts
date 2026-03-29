@@ -1,3 +1,10 @@
+export function getFlag(countryCode: string): string {
+  const code = countryCode.toUpperCase();
+  return String.fromCodePoint(
+    ...[...code].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65)
+  );
+}
+
 export const COUNTRIES = [
   { code: "us", name: "United States" },
   { code: "gb", name: "United Kingdom" },

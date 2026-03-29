@@ -2,7 +2,21 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { COUNTRIES } from "@/lib/countries";
+import { COUNTRIES, getFlag } from "@/lib/countries";
+
+const PROVIDER_LABELS: Record<string, string> = {
+  openai: "ChatGPT (OpenAI)",
+  gemini: "Gemini (Google)",
+  perplexity: "Perplexity",
+  serpapi: "Google AI Overview",
+};
+
+const PROVIDER_COLORS: Record<string, { bg: string; text: string }> = {
+  openai: { bg: "#e8f5e9", text: "#2e7d32" },
+  gemini: { bg: "#e3f2fd", text: "#1565c0" },
+  perplexity: { bg: "#f3e5f5", text: "#7b1fa2" },
+  serpapi: { bg: "#fff3e0", text: "#e65100" },
+};
 
 export default function NewQueryPage() {
   const router = useRouter();
@@ -13,6 +27,7 @@ export default function NewQueryPage() {
   const [clientBrandsText, setClientBrandsText] = useState("");
   const [competitorBrandsText, setCompetitorBrandsText] = useState("");
   const [questionsText, setQuestionsText] = useState("");
+  const [selectedProviders, setSelectedProviders] = useState<string[]>(["openai", "gemini"]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -22,6 +37,12 @@ export default function NewQueryPage() {
     const c = COUNTRIES.find((c) => c.code === code);
     setCountryCode(code);
     setCountry(c?.name || code);
+  };
+
+  const toggleProvider = (p: string) => {
+    setSelectedProviders((prev) =>
+      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,7 +56,13 @@ export default function NewQueryPage() {
       setError("Please enter at least one question");
       return;
     }
+    if (selectedProviders.length === 0) {
+      setError("Please select at least one platform");
+      return;
+    }
     setLoading(true);
+
+    // Step 1: Create the report
     const res = await fetch("/api/queries", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -47,12 +74,21 @@ export default function NewQueryPage() {
       }),
     });
     const data = await res.json();
-    setLoading(false);
-    if (res.ok) {
-      router.push(`/query/${data.id}`);
-    } else {
-      setError(data.error || "Failed to create query");
+    if (!res.ok) {
+      setError(data.error || "Failed to create report");
+      setLoading(false);
+      return;
     }
+
+    // Step 2: Auto-run the query
+    fetch(`/api/queries/${data.id}/run`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ providers: selectedProviders }),
+    });
+
+    // Redirect immediately — responses will populate in the background
+    router.push(`/query/${data.id}`);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,13 +132,13 @@ export default function NewQueryPage() {
         )}
 
         <div className="card p-6">
-          <label className="block text-sm font-semibold text-[#1b4332] mb-2">Query Title</label>
+          <label className="block text-sm font-semibold text-[#1b4332] mb-2">Report Title</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="input-field"
-            placeholder="e.g., Toyota Parts Full Audit"
+            placeholder="e.g., Finance & Investment India Audit"
             required
           />
         </div>
@@ -115,11 +151,11 @@ export default function NewQueryPage() {
             className="input-field"
           >
             {COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>{c.name}</option>
+              <option key={c.code} value={c.code}>{getFlag(c.code)} {c.name}</option>
             ))}
           </select>
           <p className="text-xs text-[#6b7280] mt-2">
-            Responses will be tailored to this country. SerpAPI will use the corresponding region code.
+            Responses will be tailored to this country. No VPN needed.
           </p>
         </div>
 
@@ -199,21 +235,57 @@ export default function NewQueryPage() {
             value={questionsText}
             onChange={(e) => setQuestionsText(e.target.value)}
             className="input-field min-h-[300px] font-mono text-sm"
-            placeholder={`Enter one question per line, e.g.:\n\nIs it normal for Toyota parts to cost different amounts at different Toyota dealers?\nWhy doesn't Toyota show a single national price for parts on autoparts.toyota.com?\nHow do I find the cheapest Toyota dealer for the same OEM part online?\n\nOr upload a CSV/Excel file with questions in the first column.`}
+            placeholder={`Enter one question per line, e.g.:\n\nWhat are the best SEO tools for small businesses?\nWhich email marketing platforms are most recommended?\nWhat is the best CRM software for startups?\n\nOr upload a CSV/Excel file with questions in the first column.`}
             required
           />
           <p className="text-xs text-[#6b7280] mt-2">One question per line, or upload a CSV/Excel file with questions in the first column.</p>
         </div>
 
+        <div className="card p-6">
+          <label className="block text-sm font-semibold text-[#1b4332] mb-3">Select Platforms to Query</label>
+          <div className="flex flex-wrap gap-3">
+            {Object.entries(PROVIDER_LABELS).map(([key, label]) => {
+              const selected = selectedProviders.includes(key);
+              const colors = PROVIDER_COLORS[key];
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => toggleProvider(key)}
+                  className="px-4 py-2 rounded-xl font-medium text-sm transition-all border-2"
+                  style={{
+                    backgroundColor: selected ? colors.bg : "white",
+                    color: selected ? colors.text : "#6b7280",
+                    borderColor: selected ? colors.text : "#e5e7eb",
+                  }}
+                >
+                  {selected && (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="inline mr-1">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                  )}
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-[#6b7280] mt-2">
+            Selected platforms will be queried immediately after creating the report.
+          </p>
+        </div>
+
         <button type="submit" disabled={loading} className="btn-primary">
           {loading ? (
-            <span className="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+            <>
+              <span className="animate-spin inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+              Creating & running...
+            </>
           ) : (
             <>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 4v16m8-8H4" />
+                <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
-              Create Report
+              Create & Run Report ({selectedProviders.length} platform{selectedProviders.length !== 1 ? "s" : ""})
             </>
           )}
         </button>
