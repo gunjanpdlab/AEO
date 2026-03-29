@@ -132,10 +132,11 @@ export async function generateAnalysisPdf(
     '3. Citation and URL Attribution Analysis',
     '4. Top Recommendations and Rank Position',
     '5. Sentiment Analysis',
-    '6. Buyer Journey Funnel Analysis',
-    '7. Competitive Gap Analysis',
-    '8. Brand AEO Scorecard',
-    '9. Recommendations and Next Steps',
+    '6. Question Category Breakdown',
+    '7. Buyer Journey Funnel Analysis',
+    '8. Competitive Gap Analysis',
+    '9. Brand AEO Scorecard',
+    '10. Recommendations and Next Steps',
   ];
   for (const item of toc) {
     doc.setFontSize(11);
@@ -216,6 +217,10 @@ export async function generateAnalysisPdf(
   y += 2;
 
   if (charts?.brandPresence) y = await addChartImage(doc, charts.brandPresence, y);
+  if (charts?.clientVsCompetitorSov) {
+    if (y + 95 > 270) { doc.addPage(); pageNum++; addFooter(doc, pageNum, config.platform, config.country, config.date); y = 20; }
+    y = await addChartImage(doc, charts.clientVsCompetitorSov, y, 130, 90);
+  }
 
   autoTable(doc, {
     startY: y,
@@ -239,6 +244,10 @@ export async function generateAnalysisPdf(
   y += 2;
 
   if (charts?.urlCitations) y = await addChartImage(doc, charts.urlCitations, y);
+  if (charts?.mentionToCitation) {
+    if (y + 95 > 270) { doc.addPage(); pageNum++; addFooter(doc, pageNum, config.platform, config.country, config.date); y = 20; }
+    y = await addChartImage(doc, charts.mentionToCitation, y);
+  }
 
   autoTable(doc, {
     startY: y,
@@ -262,6 +271,10 @@ export async function generateAnalysisPdf(
   y += 2;
 
   if (charts?.topRecommendationsPie) y = await addChartImage(doc, charts.topRecommendationsPie, y, 130, 90);
+  if (charts?.avgRankPosition) {
+    if (y + 95 > 270) { doc.addPage(); pageNum++; addFooter(doc, pageNum, config.platform, config.country, config.date); y = 20; }
+    y = await addChartImage(doc, charts.avgRankPosition, y);
+  }
 
   autoTable(doc, {
     startY: y,
@@ -298,18 +311,43 @@ export async function generateAnalysisPdf(
     tableWidth: 180,
   });
 
+  // ===== PAGE: CATEGORY BREAKDOWN =====
+  const allBrands = [...config.clientBrands, ...config.competitorBrands];
+
+  doc.addPage();
+  pageNum++;
+  addFooter(doc, pageNum, config.platform, config.country, config.date);
+  y = 20;
+  y = sectionTitle(doc, '6. Question Category Breakdown', y);
+  y = bodyText(doc, 'Questions are automatically categorized by type (Best/Discovery, How-to, Trust, Comparison, etc.). This shows brand visibility across different query intents.', y);
+  y += 2;
+
+  if (charts?.presenceByCategory) y = await addChartImage(doc, charts.presenceByCategory, y);
+
+  autoTable(doc, {
+    startY: y,
+    head: [['Category', 'Queries', ...allBrands]],
+    body: categoryMetrics.map(c => [
+      c.category, c.questionCount,
+      ...allBrands.map((b: string) => `${((c.brandPresence[b] || 0) * 100).toFixed(0)}%`),
+    ]),
+    headStyles: { fillColor: NAVY, fontSize: 6, textColor: [255, 255, 255] },
+    bodyStyles: { fontSize: 6 },
+    alternateRowStyles: { fillColor: LIGHT_GRAY },
+    margin: { left: 15 },
+    tableWidth: 180,
+  });
+
   // ===== PAGE: FUNNEL =====
   doc.addPage();
   pageNum++;
   addFooter(doc, pageNum, config.platform, config.country, config.date);
   y = 20;
-  y = sectionTitle(doc, '6. Buyer Journey Funnel', y);
-  y = bodyText(doc, 'Queries were mapped to four buyer journey stages to identify where each brand has the strongest and weakest visibility.', y);
+  y = sectionTitle(doc, '7. Buyer Journey Funnel', y);
+  y = bodyText(doc, 'Queries mapped to four buyer journey stages: Awareness, Consideration, Decision, Post-Purchase. Shows where each brand has strongest and weakest visibility across the customer funnel.', y);
   y += 2;
 
   if (charts?.funnelAnalysis) y = await addChartImage(doc, charts.funnelAnalysis, y);
-
-  const allBrands = [...config.clientBrands, ...config.competitorBrands];
   autoTable(doc, {
     startY: y,
     head: [['Stage', 'Queries', ...allBrands]],
@@ -329,7 +367,7 @@ export async function generateAnalysisPdf(
   pageNum++;
   addFooter(doc, pageNum, config.platform, config.country, config.date);
   y = 20;
-  y = sectionTitle(doc, '7. Competitive Gap Analysis', y);
+  y = sectionTitle(doc, '8. Competitive Gap Analysis', y);
   y = bodyText(doc, `Gap analysis identifies queries where competitors appear but ${config.clientName} brands do not. These represent immediate AEO improvement opportunities.`, y);
   y += 2;
 
@@ -372,7 +410,7 @@ export async function generateAnalysisPdf(
   pageNum++;
   addFooter(doc, pageNum, config.platform, config.country, config.date);
   y = 20;
-  y = sectionTitle(doc, '8. Brand AEO Scorecard', y);
+  y = sectionTitle(doc, '9. Brand AEO Scorecard', y);
   y = bodyText(doc, 'The AEO Scorecard provides a composite score (0-100) based on six weighted dimensions: Presence (25%), Citation Rate (15%), Sentiment (15%), Top Recommendations (15%), Mention Depth (15%), and First-Mention Rate (15%).', y);
   y += 2;
 
@@ -401,7 +439,7 @@ export async function generateAnalysisPdf(
   pageNum++;
   addFooter(doc, pageNum, config.platform, config.country, config.date);
   y = 20;
-  y = sectionTitle(doc, '9. Recommendations and Next Steps', y);
+  y = sectionTitle(doc, '10. Recommendations and Next Steps', y);
 
   y = subSection(doc, 'Immediate Priorities', y);
   const critCount = gapSummary.CRITICAL || 0;
