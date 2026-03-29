@@ -44,6 +44,24 @@ interface QueryData {
   createdAt: string;
 }
 
+function friendlyError(raw?: string): string {
+  if (!raw) return "An unexpected error occurred. Please try again.";
+  const s = raw.toLowerCase();
+  if (s.includes("429") || s.includes("quota") || s.includes("rate"))
+    return "Rate limit exceeded. The API quota for this platform has been reached. Please wait a few minutes and try again, or contact your admin to upgrade the API plan.";
+  if (s.includes("401") || s.includes("unauthorized") || s.includes("invalid api key") || s.includes("incorrect api key"))
+    return "Invalid API key. The configured API key for this platform is not valid. Please contact your admin to update it in API Settings.";
+  if (s.includes("403") || s.includes("forbidden"))
+    return "Access denied. The API key does not have permission to use this model. Please contact your admin.";
+  if (s.includes("500") || s.includes("internal server error"))
+    return "The AI platform is experiencing issues. Please try again later.";
+  if (s.includes("timeout") || s.includes("timed out"))
+    return "Request timed out. The AI platform took too long to respond. Please try again.";
+  if (s.includes("network") || s.includes("fetch"))
+    return "Network error. Could not reach the AI platform. Please check your connection and try again.";
+  return "Something went wrong. Please try again or contact your admin.";
+}
+
 export default function QueryDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [query, setQuery] = useState<QueryData | null>(null);
@@ -261,10 +279,28 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
                     return (
                       <span
                         key={r.provider}
-                        className="text-xs px-2 py-0.5 rounded-full font-medium"
-                        style={{ backgroundColor: colors.bg, color: colors.text }}
+                        className="text-xs px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1"
+                        style={{
+                          backgroundColor: r.status === "error" ? "#fef2f2" : colors.bg,
+                          color: r.status === "error" ? "#dc2626" : colors.text,
+                        }}
                       >
-                        {r.status === "running" ? "..." : r.status === "error" ? "error" : PROVIDER_LABELS[r.provider]}
+                        {r.status === "running" ? (
+                          <>
+                            <span className="animate-spin inline-block w-3 h-3 border-[1.5px] border-current border-t-transparent rounded-full" />
+                            {PROVIDER_LABELS[r.provider]}
+                          </>
+                        ) : r.status === "error" ? (
+                          <>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                            {PROVIDER_LABELS[r.provider]}
+                          </>
+                        ) : (
+                          <>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
+                            {PROVIDER_LABELS[r.provider]}
+                          </>
+                        )}
                       </span>
                     );
                   })}
@@ -297,8 +333,12 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
                             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: colors.text }} />
                             {PROVIDER_LABELS[r.provider]}
                           </span>
-                          <span className={`text-xs font-medium status-${r.status}`}>
-                            {r.status}
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                            r.status === "completed" ? "bg-green-100 text-green-700" :
+                            r.status === "error" ? "bg-red-100 text-red-600" :
+                            r.status === "running" ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600"
+                          }`}>
+                            {r.status === "completed" ? "Completed" : r.status === "error" ? "Failed" : r.status === "running" ? "In Progress" : r.status}
                           </span>
                         </div>
                         {r.status === "completed" ? (
@@ -306,13 +346,25 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
                             {r.text}
                           </div>
                         ) : r.status === "error" ? (
-                          <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
-                            Error: {r.error}
+                          <div className="flex items-start gap-3 bg-red-50 border border-red-200 p-4 rounded-lg">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="12" y1="8" x2="12" y2="12" />
+                              <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            <div>
+                              <p className="text-sm font-medium text-red-700">{friendlyError(r.error)}</p>
+                            </div>
                           </div>
                         ) : r.status === "running" ? (
-                          <div className="flex items-center gap-2 text-[#e65100]">
-                            <span className="animate-spin inline-block w-4 h-4 border-2 border-[#e65100] border-t-transparent rounded-full" />
-                            Fetching response...
+                          <div className="flex items-center gap-3 py-3">
+                            <div className="relative">
+                              <div className="animate-spin w-8 h-8 border-3 border-[#d8f3dc] rounded-full" style={{ borderTopColor: colors.text }} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium" style={{ color: colors.text }}>Generating response...</p>
+                              <p className="text-xs text-[#9ca3af]">This may take a few seconds</p>
+                            </div>
                           </div>
                         ) : null}
                       </div>
