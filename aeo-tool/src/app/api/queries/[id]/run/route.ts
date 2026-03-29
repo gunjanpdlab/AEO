@@ -131,39 +131,50 @@ export async function POST(
 
   query.status = "running";
 
-  // Prepare questions list
-  const questions = query.questions.map((q: { _id: string; text: string; responses: Array<{ provider: string }> }) => ({
-    _id: q._id,
-    text: q.text,
-  }));
+  // Build per-provider list of questions that need to be run
+  // (skip questions that already have a completed response for that provider)
+  const providerQuestions: Record<string, Array<{ _id: string; text: string }>> = {};
 
-  // Process each question - set up pending responses
   for (let qi = 0; qi < query.questions.length; qi++) {
     const question = query.questions[qi];
 
-    // Remove existing responses for selected providers
-    question.responses = question.responses.filter(
-      (r: { provider: string }) => !selectedProviders.includes(r.provider)
-    );
-
-    // Add pending responses
     for (const provider of selectedProviders) {
-      if (resolvedKeys[provider]) {
-        question.responses.push({
-          provider,
-          text: "",
-          status: "running" as const,
-        });
+      if (!resolvedKeys[provider]) continue;
+
+      const existing = question.responses.find(
+        (r: { provider: string; status: string }) => r.provider === provider
+      );
+
+      if (existing && existing.status === "completed") {
+        // Already done — skip
+        continue;
       }
+
+      // Remove failed/pending response if exists
+      if (existing) {
+        question.responses = question.responses.filter(
+          (r: { provider: string }) => r.provider !== provider
+        );
+      }
+
+      // Add as running
+      question.responses.push({
+        provider,
+        text: "",
+        status: "running" as const,
+      });
+
+      if (!providerQuestions[provider]) providerQuestions[provider] = [];
+      providerQuestions[provider].push({ _id: question._id, text: question.text });
     }
   }
   await query.save();
 
   // Run each provider sequentially (questions in order with delays),
   // but different providers run in parallel with each other
-  const providerPromises = selectedProviders
-    .filter((p: string) => resolvedKeys[p] && PROVIDER_FNS[p])
-    .map((provider: string) => {
+  const providerPromises = Object.entries(providerQuestions)
+    .filter(([p]) => PROVIDER_FNS[p])
+    .map(([provider, questions]) => {
       const countryArg =
         provider === "serpapi" ? query.countryCode : query.country;
       return runProviderSequentially(
