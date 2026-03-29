@@ -108,16 +108,20 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
     );
   };
 
-  const runQuery = async () => {
+  const runQuery = () => {
     if (selectedProviders.length === 0) return;
     setRunning(true);
-    await fetch(`/api/queries/${id}/run`, {
+    // Fire-and-forget — runs on server even if user navigates away
+    fetch(`/api/queries/${id}/run`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ providers: selectedProviders }),
     });
-    fetchQuery();
-    setRunning(false);
+    // Refresh after a short delay to pick up "running" status, then polling takes over
+    setTimeout(() => {
+      fetchQuery();
+      setRunning(false);
+    }, 1500);
   };
 
   const downloadFile = (format: string) => {

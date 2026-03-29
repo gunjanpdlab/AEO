@@ -25,10 +25,13 @@ This tool lets you:
 - **Select a target geography** (45 countries supported)
 - **Query up to 4 AI platforms** simultaneously
 - **Configure brand tracking** (client brands vs competitor brands)
-- **Compare responses** side-by-side
+- **Compare responses** side-by-side with country flag icons
 - **Analyze brand visibility** with 12 charts, KPI metrics, and competitive gap analysis
 - **Download reports** as Raw Excel, Analysis Excel (11 sheets), or PDF Audit Report
-- **Validate API keys** directly from the settings page
+- **Smart retry** — re-running only retries failed responses, completed ones are kept
+- **Rate limiting** — built-in retry with exponential backoff for API quota limits
+- **Background processing** — queries run on the server, safe to navigate away
+- **User-friendly errors** — raw API errors are translated to clear, actionable messages
 
 ---
 
