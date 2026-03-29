@@ -343,18 +343,21 @@ Reports are generated on-the-fly from stored responses. They do **not** re-call 
 10. Raw Data (per-question, per-brand breakdown)
 11. Charts (embedded PNG images)
 
-**PDF Audit Report (~10 pages):**
-- Cover page with client/competitor branding
-- Table of Contents
-- Executive Summary with KPI boxes and brand comparison table
-- Brand Presence and Share of Voice (chart + table)
-- Citation and URL Attribution (chart + table)
-- Top Recommendations and Rank (chart + table)
-- Sentiment Analysis (chart + table)
-- Buyer Journey Funnel (chart + table)
-- Competitive Gap Analysis (chart + table + critical query list)
-- Brand AEO Scorecard (radar chart + table)
-- Recommendations and Next Steps (auto-generated from data)
+**PDF Audit Report (~12 pages):**
+1. Cover page with client/competitor branding
+2. Table of Contents
+3. Executive Summary with KPI boxes, brand comparison table, and key findings
+4. Brand Presence and Share of Voice (presence chart + SOV doughnut + table)
+5. Citation and URL Attribution (citations chart + mention-to-citation chart + table)
+6. Top Recommendations and Rank (top recs pie + avg rank chart + table)
+7. Sentiment Analysis (sentiment distribution chart + table)
+8. Question Category Breakdown (category chart + table)
+9. Buyer Journey Funnel (funnel chart + table)
+10. Competitive Gap Analysis (gaps chart + gap table + critical query list)
+11. Brand AEO Scorecard (radar chart + table)
+12. Recommendations and Next Steps (auto-generated priorities, content optimization, monitoring)
+
+All charts on the analysis dashboard page are also included in the PDF and Excel reports. Charts with no data are automatically skipped.
 
 ---
 
