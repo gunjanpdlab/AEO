@@ -20,6 +20,67 @@ const PROVIDER_FNS: Record<
   serpapi: queryGoogleAIO,
 };
 
+// Delay between sequential requests per provider (ms)
+const PROVIDER_DELAY: Record<string, number> = {
+  openai: 200,
+  gemini: 4000,   // Gemini free tier: ~15 req/min
+  perplexity: 500,
+  serpapi: 1000,
+};
+
+async function runProviderSequentially(
+  provider: string,
+  key: string,
+  questions: Array<{ _id: string; text: string }>,
+  queryId: string,
+  countryArg: string
+) {
+  const fn = PROVIDER_FNS[provider];
+  if (!fn) return;
+  const delayMs = PROVIDER_DELAY[provider] || 500;
+
+  for (let qi = 0; qi < questions.length; qi++) {
+    const question = questions[qi];
+    if (qi > 0) await new Promise((res) => setTimeout(res, delayMs));
+
+    try {
+      const text = await fn(key, question.text, countryArg);
+      await Query.updateOne(
+        { _id: queryId, "questions._id": question._id },
+        {
+          $set: {
+            "questions.$[q].responses.$[r].text": text,
+            "questions.$[q].responses.$[r].status": "completed",
+          },
+        },
+        {
+          arrayFilters: [
+            { "q._id": question._id },
+            { "r.provider": provider },
+          ],
+        }
+      );
+    } catch (err) {
+      console.error(`[AEO] ${provider} error for Q${qi}:`, err);
+      await Query.updateOne(
+        { _id: queryId, "questions._id": question._id },
+        {
+          $set: {
+            "questions.$[q].responses.$[r].status": "error",
+            "questions.$[q].responses.$[r].error": String(err),
+          },
+        },
+        {
+          arrayFilters: [
+            { "q._id": question._id },
+            { "r.provider": provider },
+          ],
+        }
+      );
+    }
+  }
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -70,7 +131,13 @@ export async function POST(
 
   query.status = "running";
 
-  // Process each question
+  // Prepare questions list
+  const questions = query.questions.map((q: { _id: string; text: string; responses: Array<{ provider: string }> }) => ({
+    _id: q._id,
+    text: q.text,
+  }));
+
+  // Process each question - set up pending responses
   for (let qi = 0; qi < query.questions.length; qi++) {
     const question = query.questions[qi];
 
@@ -92,62 +159,23 @@ export async function POST(
   }
   await query.save();
 
-  // Run all queries concurrently
-  const allPromises: Promise<void>[] = [];
-
-  for (let qi = 0; qi < query.questions.length; qi++) {
-    const question = query.questions[qi];
-
-    for (const provider of selectedProviders) {
-      const key = resolvedKeys[provider];
-      const fn = PROVIDER_FNS[provider];
-      if (!key || !fn) continue;
-
+  // Run each provider sequentially (questions in order with delays),
+  // but different providers run in parallel with each other
+  const providerPromises = selectedProviders
+    .filter((p: string) => resolvedKeys[p] && PROVIDER_FNS[p])
+    .map((provider: string) => {
       const countryArg =
         provider === "serpapi" ? query.countryCode : query.country;
+      return runProviderSequentially(
+        provider,
+        resolvedKeys[provider],
+        questions,
+        id,
+        countryArg
+      );
+    });
 
-      const promise = fn(key, question.text, countryArg)
-        .then(async (text) => {
-          await Query.updateOne(
-            { _id: id, "questions._id": question._id },
-            {
-              $set: {
-                "questions.$[q].responses.$[r].text": text,
-                "questions.$[q].responses.$[r].status": "completed",
-              },
-            },
-            {
-              arrayFilters: [
-                { "q._id": question._id },
-                { "r.provider": provider },
-              ],
-            }
-          );
-        })
-        .catch(async (err) => {
-          console.error(`[AEO] ${provider} error for Q${qi}:`, err);
-          await Query.updateOne(
-            { _id: id, "questions._id": question._id },
-            {
-              $set: {
-                "questions.$[q].responses.$[r].status": "error",
-                "questions.$[q].responses.$[r].error": String(err),
-              },
-            },
-            {
-              arrayFilters: [
-                { "q._id": question._id },
-                { "r.provider": provider },
-              ],
-            }
-          );
-        });
-
-      allPromises.push(promise);
-    }
-  }
-
-  await Promise.all(allPromises);
+  await Promise.all(providerPromises);
 
   // Mark query as completed
   await Query.findByIdAndUpdate(id, { status: "completed" });
