@@ -19,6 +19,7 @@ async function renderChart(config: ChartConfiguration, w = 800, h = 500): Promis
       height: h,
       backgroundColor: 'white',
       format: 'png',
+      version: '4',
     }),
   });
   if (!res.ok) throw new Error(`QuickChart error: ${res.status}`);

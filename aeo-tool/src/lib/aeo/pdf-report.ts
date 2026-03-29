@@ -62,9 +62,15 @@ function subSection(doc: jsPDF, text: string, y: number): number {
 async function addChartImage(doc: jsPDF, base64: string, y: number, w = 170, h = 95): Promise<number> {
   if (!base64) return y;
   try {
+    // Check if we need a new page
+    if (y + h > 270) {
+      doc.addPage();
+      y = 20;
+    }
     doc.addImage(base64, 'PNG', 15, y, w, h);
     return y + h + 5;
-  } catch {
+  } catch (e) {
+    console.error('Failed to add chart image to PDF:', e);
     return y;
   }
 }
