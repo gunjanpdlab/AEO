@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { COUNTRIES, getFlag } from "@/lib/countries";
+import { COUNTRIES, getFlagUrl } from "@/lib/countries";
 
 interface BrandMetric {
   name: string;
@@ -204,7 +204,7 @@ export default function AnalysisPage() {
           </Link>
           <h1 className="text-2xl font-bold text-[#1b4332]">{config.clientName} AEO Analysis</h1>
           <p className="text-sm text-[#6b7280] mt-1">
-            {config.queryTitle} | {config.platform} | {getFlag(COUNTRIES.find(c => c.name === config.country)?.code || "us")} {config.country} | {config.date} | {config.totalQuestions} Queries
+            {config.queryTitle} | {config.platform} | <img src={getFlagUrl(COUNTRIES.find(c => c.name === config.country)?.code || "us")} alt="" width={20} height={15} className="inline-block" /> {config.country} | {config.date} | {config.totalQuestions} Queries
           </p>
           <div className="flex gap-4 mt-2 text-xs">
             <span className="px-2 py-1 bg-[#d6e4f0] text-[#2F5496] rounded font-medium">
@@ -467,7 +467,7 @@ export default function AnalysisPage() {
 
       {/* Footer */}
       <div className="text-center text-xs text-[#9ca3af] pb-8">
-        Source: {config.platform} | {getFlag(COUNTRIES.find(c => c.name === config.country)?.code || "us")} {config.country} | {config.date} | {config.totalQuestions} Queries Analyzed
+        Source: {config.platform} | <img src={getFlagUrl(COUNTRIES.find(c => c.name === config.country)?.code || "us")} alt="" width={16} height={12} className="inline-block" /> {config.country} | {config.date} | {config.totalQuestions} Queries Analyzed
       </div>
     </div>
   );

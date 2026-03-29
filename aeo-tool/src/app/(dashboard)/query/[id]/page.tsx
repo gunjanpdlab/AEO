@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { getFlag } from "@/lib/countries";
+import { getFlagUrl } from "@/lib/countries";
 
 const PROVIDER_LABELS: Record<string, string> = {
   openai: "ChatGPT (OpenAI)",
@@ -146,7 +146,7 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
           <h1 className="text-3xl font-bold text-[#1b4332] mt-1">{query.title}</h1>
           <div className="flex items-center gap-4 mt-2 text-sm text-[#6b7280]">
             <span className="flex items-center gap-1">
-              {getFlag(query.countryCode)} {query.country}
+              <img src={getFlagUrl(query.countryCode)} alt="" width={20} height={15} className="inline-block" /> {query.country}
             </span>
             <span>{query.questions.length} questions</span>
             <span>{new Date(query.createdAt).toLocaleDateString()}</span>

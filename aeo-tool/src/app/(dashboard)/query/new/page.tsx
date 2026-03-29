@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { COUNTRIES, getFlag } from "@/lib/countries";
+import { COUNTRIES, getFlagUrl } from "@/lib/countries";
 
 const PROVIDER_LABELS: Record<string, string> = {
   openai: "ChatGPT (OpenAI)",
@@ -160,15 +160,18 @@ export default function NewQueryPage() {
 
         <div className="card p-6">
           <label className="block text-sm font-semibold text-[#1b4332] mb-2">Target Country / Geography</label>
-          <select
-            value={countryCode}
-            onChange={(e) => handleCountryChange(e.target.value)}
-            className="input-field"
-          >
-            {COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>{getFlag(c.code)} {c.name}</option>
-            ))}
-          </select>
+          <div className="flex items-center gap-3">
+            <img src={getFlagUrl(countryCode, 32)} alt="" width={32} height={24} className="rounded shadow-sm" />
+            <select
+              value={countryCode}
+              onChange={(e) => handleCountryChange(e.target.value)}
+              className="input-field flex-1"
+            >
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>{c.name}</option>
+              ))}
+            </select>
+          </div>
           <p className="text-xs text-[#6b7280] mt-2">
             Responses will be tailored to this country. No VPN needed.
           </p>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getFlag } from "@/lib/countries";
+import { getFlagUrl } from "@/lib/countries";
 
 interface QueryItem {
   id: string;
@@ -95,7 +95,7 @@ export default function DashboardPage() {
                     <circle cx="12" cy="12" r="10" />
                     <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
                   </svg>
-                  {getFlag(q.countryCode)} {q.country}
+                  <img src={getFlagUrl(q.countryCode)} alt="" width={20} height={15} className="inline-block" /> {q.country}
                 </div>
                 <div className="flex items-center gap-2">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
