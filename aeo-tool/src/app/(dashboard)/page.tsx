@@ -46,7 +46,7 @@ export default function DashboardPage() {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 4v16m8-8H4" />
           </svg>
-          New Query
+          New Report
         </Link>
       </div>
 

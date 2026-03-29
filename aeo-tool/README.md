@@ -1,6 +1,6 @@
-# 🌿 AEO Audit Tool
+# AEO Audit Tool
 
-### AI Engine Optimization - Multi-Platform AI Response Auditing
+### Answer Engine Optimization - Multi-Platform AI Response Auditing
 
 <div align="center">
 
@@ -10,36 +10,68 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-06B6D4?style=for-the-badge&logo=tailwindcss)
 ![Vercel](https://img.shields.io/badge/Deploy-Vercel-000?style=for-the-badge&logo=vercel)
 
-**Audit how AI platforms answer your questions across different geographies.**
+**Audit how AI platforms answer questions about your brand across different geographies.**
 
 </div>
 
 ---
 
-## 🎯 What is AEO?
+## What is AEO?
 
-**AI Engine Optimization (AEO)** is the practice of understanding and optimizing how AI platforms (ChatGPT, Gemini, Perplexity, Google AI Overviews) answer questions about your brand, products, or industry.
+**Answer Engine Optimization (AEO)** is the practice of understanding and optimizing how AI platforms (ChatGPT, Gemini, Perplexity, Google AI Overviews) answer questions about your brand, products, or industry. Think of it as **SEO for AI** - it tracks whether AI assistants mention, recommend, or cite your brand.
 
 This tool lets you:
-- 📝 **Input questions** you want to audit (type manually or upload CSV/Excel)
-- 🌍 **Select a target geography** (45+ countries supported)
-- 🤖 **Query 4 AI platforms** simultaneously
-- 📊 **Compare responses** side-by-side
-- 📥 **Download reports** as Excel spreadsheets
-- 📊 **AEO Analysis Dashboard** with brand visibility metrics, charts, and competitive intelligence
-- 📈 **Analysis Reports** - downloadable Excel (11 sheets) and PDF audit reports with 12 charts
-- 🔑 **Validate API keys** directly from the settings page
+- **Input questions** you want to audit (type manually or upload CSV/Excel)
+- **Select a target geography** (45 countries supported)
+- **Query up to 4 AI platforms** simultaneously
+- **Configure brand tracking** (client brands vs competitor brands)
+- **Compare responses** side-by-side
+- **Analyze brand visibility** with 12 charts, KPI metrics, and competitive gap analysis
+- **Download reports** as Raw Excel, Analysis Excel (11 sheets), or PDF Audit Report
+- **Validate API keys** directly from the settings page
 
 ---
 
-## 🔑 Default Login Accounts
+## Tech Stack
+
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| **Framework** | Next.js (App Router) | 16.1.6 |
+| **Frontend** | React + TypeScript | React 19.2.4, TS 5.9.3 |
+| **Styling** | Tailwind CSS | 4.2.1 |
+| **Icons** | Lucide React | 0.577.0 |
+| **Database** | MongoDB Atlas (Mongoose) | Mongoose 9.2.4 |
+| **Authentication** | NextAuth.js (JWT) | 5.0.0-beta.30 |
+| **Password Hashing** | bcryptjs | 3.0.3 |
+| **Excel Generation** | ExcelJS | 4.4.0 |
+| **PDF Generation** | jsPDF + jspdf-autotable | 4.2.0 / 5.0.7 |
+| **Chart Rendering** | Chart.js + chartjs-node-canvas | 4.5.1 / 5.0.0 |
+| **AI: OpenAI** | openai SDK (GPT-4o) | 6.25.0 |
+| **AI: Google** | @google/generative-ai (Gemini 2.0 Flash) | 0.24.1 |
+| **AI: Perplexity** | OpenAI-compatible SDK (Sonar Pro) | via openai SDK |
+| **AI: Google AIO** | SerpAPI (Google Search) | REST API |
+
+---
+
+## Supported AI Platforms
+
+| Platform | API Used | Model | What It Returns |
+|----------|----------|-------|-----------------|
+| **ChatGPT** | OpenAI API | GPT-4o | Full conversational answers |
+| **Gemini** | Google Generative AI | Gemini 2.0 Flash | Detailed responses with references |
+| **Perplexity** | Perplexity API | Sonar Pro | Cited answers with source links |
+| **Google AI Overview** | SerpAPI | Google Search | AI Overview snippets from Google Search |
+
+---
+
+## Default Login Accounts
 
 The app comes with two pre-configured accounts:
 
 | Role | Email | Password | Permissions |
 |------|-------|----------|-------------|
-| 🔶 **Admin** | `admin@aeo.com` | `admin123` | Full access: API settings, user management, queries |
-| 🔷 **User** | `user@aeo.com` | `user123` | Standard access: API settings, queries |
+| **Admin** | `admin@aeo.com` | `admin123` | Full access: API settings, user management, queries |
+| **User** | `user@aeo.com` | `user123` | Standard access: API settings, queries |
 
 > **First-time setup:** After deploying, call `POST /api/seed` once to create these default accounts.
 >
@@ -47,52 +79,39 @@ The app comes with two pre-configured accounts:
 > curl -X POST https://your-app.vercel.app/api/seed
 > ```
 
-### Admin vs User
+### Admin vs User Permissions
 
 | Feature | Admin | User |
 |---------|:-----:|:----:|
-| Create & run queries | ✅ | ✅ |
-| Configure API keys | ✅ | ✅ |
-| Download Excel reports | ✅ | ✅ |
-| AEO Analysis Dashboard | ✅ | ✅ |
-| Download Analysis Excel & PDF | ✅ | ✅ |
-| Manage users (create/edit/delete) | ✅ | ❌ |
-| Change user roles | ✅ | ❌ |
+| Create & run queries | Yes | Yes |
+| Configure own API keys | Yes | Yes |
+| View analysis dashboard | Yes | Yes |
+| Download Raw Excel | Yes | Yes |
+| Download Analysis Excel & PDF | Yes | Yes |
+| Manage users (create/edit/delete) | Yes | No |
+| Change user roles | Yes | No |
 
 ---
 
-## 🖥️ Supported AI Platforms
+## Geography Support
 
-| Platform | API Used | What It Returns |
-|----------|----------|-----------------|
-| 🟢 **ChatGPT** | OpenAI API (GPT-4o) | Full conversational answers |
-| 🔵 **Gemini** | Google AI (Gemini 2.0 Flash) | Detailed responses with references |
-| 🟣 **Perplexity** | Perplexity API (Sonar Pro) | Cited answers with source links |
-| 🟠 **Google AI Overview** | SerpAPI | Google's AI Overview snippets from search |
+Query AI platforms from the perspective of **45 countries**. No VPN is needed - the country selection works server-side:
 
----
+- **ChatGPT / Gemini / Perplexity** - the country is included in the prompt, so the AI tailors its response to that region
+- **SerpAPI (Google AI Overview)** - the country code is sent as a `gl` parameter to Google's API, returning localized results
 
-## 🌍 Geography Support
+Your physical location or IP address does not matter.
 
-Query AI platforms from the perspective of **45+ countries**, including:
-
-🇺🇸 United States &bull; 🇬🇧 United Kingdom &bull; 🇨🇦 Canada &bull; 🇦🇺 Australia &bull; 🇩🇪 Germany &bull; 🇫🇷 France &bull; 🇮🇳 India &bull; 🇯🇵 Japan &bull; 🇧🇷 Brazil &bull; 🇲🇽 Mexico &bull; 🇦🇪 UAE &bull; 🇸🇦 Saudi Arabia &bull; 🇸🇬 Singapore &bull; 🇿🇦 South Africa &bull; and many more...
+Supported countries include: United States, United Kingdom, Canada, Australia, Germany, France, India, Japan, Brazil, Mexico, UAE, Saudi Arabia, Singapore, South Africa, and 31 more.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+
 - MongoDB Atlas account (free tier works)
 - API keys for the platforms you want to use
-
-### Key Dependencies
-- **Next.js 16** - React framework
-- **MongoDB / Mongoose** - Database
-- **ExcelJS** - Excel report generation
-- **jsPDF + jspdf-autotable** - PDF report generation
-- **chartjs-node-canvas + Chart.js** - Server-side chart rendering for analysis
 
 ### 1. Clone & Install
 
@@ -108,7 +127,7 @@ npm install
 cp .env.example .env.local
 ```
 
-Edit `.env.local` with your MongoDB connection string:
+Edit `.env.local`:
 
 ```env
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/aeo-tool
@@ -124,8 +143,6 @@ npm run dev
 
 ### 4. Seed Default Accounts
 
-Open your browser or run:
-
 ```bash
 curl -X POST http://localhost:3000/api/seed
 ```
@@ -134,7 +151,7 @@ This creates the default **admin** and **user** accounts. Then log in at [http:/
 
 ---
 
-## ⚙️ API Keys Setup
+## API Keys Setup
 
 After logging in, go to **API Settings** in the sidebar to configure your API keys:
 
@@ -145,35 +162,49 @@ After logging in, go to **API Settings** in the sidebar to configure your API ke
 | **Perplexity** | [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api) |
 | **SerpAPI** | [serpapi.com/manage-api-key](https://serpapi.com/manage-api-key) |
 
-API keys are stored per-user in MongoDB. You only need keys for the platforms you want to use.
+- API keys are stored **per-user** in MongoDB
+- You only need keys for the platforms you want to use
+- **Admin fallback**: If a user doesn't have a key for a provider, the system falls back to any admin's key for that provider
+- Click **"Validate Keys"** to test all configured keys against each provider's API
 
 ---
 
-## 📋 How to Use
+## How to Use
+
+### Step-by-Step Workflow
 
 1. **Log in** with admin or user credentials
 2. **Configure API keys** in Settings (sidebar)
-3. **Validate API keys** - Click "Validate Keys" in Settings to test each key is working
-4. **Create a New Query** - Title, target country, brand configuration, questions (one per line or upload CSV/Excel)
-5. **Configure Brands** - Set client name, client brands, and competitor brands for AEO tracking
-6. **Select Platforms** - Choose which AI platforms to query
-7. **Run Query** - Click "Run Query" and wait for responses
-8. **View Results** - Expand each question to see responses from all platforms
-9. **Download Raw Data** - Export as Excel spreadsheet
-10. **Analyze** - Click "Analyze" to open the AEO analysis dashboard with full metrics, charts, and findings
-11. **Download Reports** - Export Analysis Excel (11 sheets) or PDF Audit Report from the dashboard
+3. **Validate API keys** - click "Validate Keys" to confirm each key works
+4. **Create a New Query** - set title, target country, and add questions (type manually or upload CSV/Excel)
+5. **Configure Brands** - set client name, client brands, and competitor brands for tracking
+6. **Select Platforms** - choose which AI platforms to query (ChatGPT, Gemini, Perplexity, Google AI Overview)
+7. **Run Query** - click "Run Query" and wait for all platforms to respond
+8. **View Results** - expand each question to see side-by-side responses from all platforms
+9. **Download Raw Data** - click "Excel" to export raw responses as a spreadsheet
+10. **Analyze** - click "Analyze" to open the AEO analysis dashboard (requires both client and competitor brands)
+11. **Download Reports** - from the analysis dashboard, export Analysis Excel (11 sheets) or PDF Audit Report
+
+### Example Test Query
+
+To quickly test the tool:
+- **Client Name**: `Semrush`
+- **Client Brands**: `Semrush`
+- **Competitor Brands**: `Ahrefs, Moz, SE Ranking`
+- **Country**: United States
+- **Question**: `What are the best SEO tools for small businesses?`
 
 ---
 
-## 📤 Bulk Question Upload
+## Bulk Question Upload
 
-You can upload questions in bulk using CSV or Excel files instead of typing them manually:
+Upload questions in bulk using CSV or Excel files:
 
 - **Supported formats**: `.csv`, `.xlsx`, `.xls`
-- **Format**: Questions should be in the **first column** of the file
+- **Format**: Questions should be in the **first column**
 - **Header row**: Automatically skipped if detected (e.g., "Question", "Query", "Text")
 - **Duplicates**: Automatically removed during import
-- **Append mode**: Uploaded questions are added to any existing questions in the text area
+- **Append mode**: Uploaded questions are added to existing questions
 
 ### Example CSV format:
 ```csv
@@ -185,23 +216,23 @@ What are the top AI tools for business?
 
 ---
 
-## 📊 AEO Analysis & Reporting
+## AEO Analysis & Reporting
 
 The analysis module provides deep AEO auditing for brand visibility, competitive positioning, and content optimization opportunities.
 
 ### Brand Configuration
 
-When creating a query, you can configure:
-- **Client Name** - The parent company or brand (e.g., "PeopleConnect")
-- **Client Brands** - Comma-separated list of your brands to track (e.g., "TruthFinder, Instant Checkmate, Intelius")
-- **Competitor Brands** - Comma-separated list of competitors (e.g., "Whitepages, BeenVerified, Spokeo")
+When creating a query, configure:
+- **Client Name** - the parent company (e.g., "PeopleConnect")
+- **Client Brands** - comma-separated brands to track (e.g., "TruthFinder, Instant Checkmate, Intelius")
+- **Competitor Brands** - comma-separated competitors (e.g., "Whitepages, BeenVerified, Spokeo")
 
 ### Analysis Dashboard
 
-After running a query, click the **"Analyze"** button on the query detail page to access the full analysis dashboard. The dashboard includes:
+After running a query, click **"Analyze"** on the query detail page. The dashboard includes:
 
 **KPI Cards:**
-- Client Presence (queries where any client brand appears)
+- Client Presence (% of queries where any client brand appears)
 - Client Share of Voice (% of total mentions)
 - Top Recommendation Wins (times ranked #1)
 - URL Citations (direct links in responses)
@@ -230,7 +261,7 @@ After running a query, click the **"Analyze"** button on the query detail page t
 
 ### Analysis Metrics
 
-The analysis engine computes the following per brand:
+Per-brand metrics computed by the analysis engine:
 
 | Metric | Description |
 |--------|-------------|
@@ -279,6 +310,12 @@ Queries are classified into gap types:
 
 ### Downloadable Reports
 
+Reports are generated on-the-fly from stored responses. They do **not** re-call any AI APIs, so downloading is free and can be done unlimited times.
+
+**Raw Excel:**
+- One sheet with all questions and responses per platform
+- Available from the query detail page
+
 **Analysis Excel (11 sheets):**
 1. Executive Summary with KPIs and brand comparison
 2. Share of Voice
@@ -305,49 +342,123 @@ Queries are classified into gap types:
 - Brand AEO Scorecard (radar chart + table)
 - Recommendations and Next Steps (auto-generated from data)
 
-### Updating Existing Queries
+---
 
-For queries created before the brand configuration feature, you can add brand fields directly in MongoDB:
+## API Endpoints Reference
 
-```javascript
-db.queries.updateOne(
-  { _id: ObjectId("your-query-id") },
-  { $set: {
-    clientName: "YourCompany",
-    clientBrands: ["Brand1", "Brand2"],
-    competitorBrands: ["Comp1", "Comp2", "Comp3"]
-  }}
-);
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/[...nextauth]` | NextAuth.js handlers (login/logout/session) |
+| POST | `/api/register` | User registration (disabled for public) |
+| POST | `/api/seed` | Create default admin and user accounts |
+
+### Queries
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/queries` | List all queries for the logged-in user |
+| POST | `/api/queries` | Create a new query |
+| DELETE | `/api/queries` | Delete a query |
+| GET | `/api/queries/[id]` | Get a single query with all responses |
+| PUT | `/api/queries/[id]` | Update a query |
+| POST | `/api/queries/[id]/run` | Execute query against selected AI platforms |
+| GET | `/api/queries/[id]/download` | Download raw Excel report |
+| POST | `/api/queries/upload` | Upload CSV/Excel file with questions |
+
+### Analysis
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/queries/[id]/analysis` | Get analysis data as JSON (metrics, charts) |
+| GET | `/api/queries/[id]/analysis/excel` | Download Analysis Excel (11 sheets) |
+| GET | `/api/queries/[id]/analysis/pdf` | Download PDF Audit Report |
+
+### Settings
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/settings` | Get user's API keys (masked) |
+| POST | `/api/settings` | Save/update API keys |
+| POST | `/api/settings/validate` | Validate all configured API keys |
+
+### Admin (requires admin role)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/admin/users` | List all users |
+| POST | `/api/admin/users` | Create a new user |
+| PUT | `/api/admin/users` | Edit a user |
+| DELETE | `/api/admin/users` | Delete a user |
+| POST | `/api/admin/apikeys/validate` | Validate admin API keys |
+
+---
+
+## Database Schema
+
+### User Collection
+
+```
+{
+  name: String
+  email: String (unique)
+  password: String (bcrypt hashed, 12 rounds)
+  role: "admin" | "user"
+  apiKeys: {
+    openai?: String
+    gemini?: String
+    perplexity?: String
+    serpapi?: String
+  }
+  createdAt: Date
+}
+```
+
+### Query Collection
+
+```
+{
+  userId: String (indexed)
+  title: String
+  country: String
+  countryCode: String
+  clientName: String
+  clientBrands: [String]
+  competitorBrands: [String]
+  questions: [
+    {
+      text: String
+      responses: [
+        {
+          provider: String ("openai" | "gemini" | "perplexity" | "serpapi")
+          text: String
+          status: "pending" | "running" | "completed" | "error"
+          error?: String
+        }
+      ]
+    }
+  ]
+  status: "draft" | "running" | "completed"
+  createdAt: Date
+}
 ```
 
 ---
 
-## 🔑 API Key Validation
+## Data Flow
 
-Each user can validate their API keys directly from the **API Settings** page:
+1. **User Login** - JWT session via NextAuth
+2. **Create Query** - stored in MongoDB with draft status
+3. **Configure Brands** - set client and competitor brands for tracking
+4. **Select Platforms** - choose OpenAI, Gemini, Perplexity, SerpAPI
+5. **Run Query** - concurrent API calls to all selected platforms
+6. **Store Responses** - each platform's response saved to MongoDB
+7. **Parse Analysis** - extract brand mentions, sentiment, citations, rankings
+8. **Calculate Metrics** - brand metrics, gap analysis, category/funnel breakdowns
+9. **Generate Charts** - 12 chart images rendered server-side via Chart.js
+10. **Export Reports** - Analysis Excel (11 sheets) or PDF Audit Report (~10 pages)
 
-- Click **"Validate Keys"** to test all configured keys at once
-- Each provider shows a **Working** (green) or **Failed** (red) badge
-- Hover over a failed badge to see the error details
-- Keys are tested against each provider's actual API endpoint
-- Validates: OpenAI, Gemini, Perplexity, and SerpAPI keys
-
----
-
-## 👤 User Management (Admin Only)
-
-Admins can manage users from the **Users** page in the sidebar:
-
-- **Create new users** with name, email, password, and role
-- **Edit users** - change name, email, password, or role
-- **Delete users** - remove user accounts
-- **Assign roles** - promote users to admin or demote to regular user
-
-> Registration is disabled for public access. Only admins can create new user accounts.
+API costs are incurred **only in step 5** (Run Query). All subsequent analysis, chart generation, and report downloads use the stored responses and are free.
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 aeo-tool/
@@ -355,47 +466,65 @@ aeo-tool/
 │   ├── app/
 │   │   ├── (auth)/                    # Login page
 │   │   ├── (dashboard)/               # Dashboard, Settings, Query, Admin pages
-│   │   │   └── query/[id]/analysis/   # AEO Analysis Dashboard page
+│   │   │   ├── page.tsx               # Dashboard (query list)
+│   │   │   ├── admin/page.tsx         # User management (admin only)
+│   │   │   ├── settings/page.tsx      # API key configuration
+│   │   │   └── query/
+│   │   │       ├── new/page.tsx       # Create new query
+│   │   │       └── [id]/
+│   │   │           ├── page.tsx       # Query detail & run
+│   │   │           └── analysis/page.tsx  # AEO Analysis Dashboard
 │   │   └── api/
 │   │       ├── auth/                  # NextAuth endpoints
 │   │       ├── seed/                  # Seed default accounts
-│   │       ├── admin/users/           # Admin user management CRUD
-│   │       ├── settings/              # API key management
-│   │       └── queries/               # Query CRUD + run + download
+│   │       ├── register/              # User registration
+│   │       ├── admin/
+│   │       │   ├── users/             # User management CRUD
+│   │       │   └── apikeys/validate/  # Admin key validation
+│   │       ├── settings/              # API key management + validation
+│   │       └── queries/               # Query CRUD + run + download + upload
 │   │           └── [id]/analysis/     # Analysis JSON, Excel, PDF endpoints
-│   ├── components/                    # Sidebar & shared components
+│   ├── components/
+│   │   └── Sidebar.tsx                # Navigation sidebar
 │   ├── lib/
 │   │   ├── aeo/                       # AEO Analysis Engine
-│   │   │   ├── types.ts               # TypeScript interfaces
-│   │   │   ├── constants.ts           # Categories, sentiment words, weights
-│   │   │   ├── parser.ts              # Response parsing (mentions, citations, sentiment)
-│   │   │   ├── metrics.ts             # Aggregated metrics and gap analysis
-│   │   │   ├── charts.ts              # Server-side chart generation (12 charts)
-│   │   │   ├── excel-report.ts        # Analysis Excel builder (11 sheets)
-│   │   │   └── pdf-report.ts          # PDF Audit Report builder
-│   │   ├── mongodb.ts                 # MongoDB connection
-│   │   ├── auth.ts                    # NextAuth configuration
-│   │   └── countries.ts               # Supported geographies
-│   ├── models/                        # Mongoose schemas (User, Query)
-│   ├── providers/                     # AI platform API integrations
-│   └── types/                         # TypeScript type augmentations
+│   │   │   ├── types.ts              # TypeScript interfaces
+│   │   │   ├── constants.ts          # Categories, sentiment words, scoring weights
+│   │   │   ├── parser.ts            # Response parsing (mentions, citations, sentiment)
+│   │   │   ├── metrics.ts           # Aggregated metrics and gap analysis
+│   │   │   ├── charts.ts            # Server-side chart generation (12 charts)
+│   │   │   ├── excel-report.ts      # Analysis Excel builder (11 sheets)
+│   │   │   └── pdf-report.ts        # PDF Audit Report builder
+│   │   ├── mongodb.ts                # MongoDB connection manager
+│   │   ├── auth.ts                   # NextAuth configuration
+│   │   └── countries.ts              # 45 supported countries
+│   ├── models/
+│   │   ├── User.ts                   # User schema (with API keys)
+│   │   └── Query.ts                  # Query schema (questions + responses)
+│   ├── providers/
+│   │   └── index.ts                  # AI platform API integrations
+│   └── types/
+│       └── next-auth.d.ts            # NextAuth type augmentations
+├── public/
 ├── .env.example
 ├── next.config.ts
+├── tsconfig.json
+├── postcss.config.mjs
 └── package.json
 ```
 
 ---
 
-## ☁️ Deploy to Vercel
+## Deploy to Vercel
 
 1. Push this repo to GitHub
 2. Go to [vercel.com/new](https://vercel.com/new) and import the repo
 3. Set the **Root Directory** to `aeo-tool`
 4. Add environment variables:
-   - `MONGODB_URI` - Your MongoDB Atlas connection string
-   - `NEXTAUTH_SECRET` - A random secret string
-   - `NEXTAUTH_URL` - Your Vercel deployment URL
-5. Deploy!
+   - `MONGODB_URI` - your MongoDB Atlas connection string
+   - `NEXTAUTH_SECRET` - a random secret string
+   - `NEXTAUTH_URL` - your Vercel deployment URL
+5. Deploy
 6. **After first deploy**, seed default accounts:
    ```bash
    curl -X POST https://your-app.vercel.app/api/seed
@@ -403,19 +532,54 @@ aeo-tool/
 
 ---
 
-## 🔒 Security
+## Security
 
-- Passwords are hashed with **bcrypt** (12 rounds)
-- API keys are stored per-user in MongoDB
+- Passwords hashed with **bcrypt** (12 rounds)
+- API keys stored per-user in MongoDB
 - Session management via **NextAuth.js** with JWT strategy
 - All API routes require authentication
 - Admin routes verify admin role server-side
-- Registration is disabled - only admins can create users
+- Public registration is disabled - only admins can create users
 - `robots.txt` blocks all search engine crawlers
 
 ---
 
-## 📄 License
+## FAQ
+
+**Do I need a VPN for different country queries?**
+No. The country is passed to AI platforms via the API (in the prompt or as a parameter). Your physical location doesn't matter.
+
+**Do report downloads re-call AI APIs? Will it cost me?**
+No. AI APIs are only called once when you click "Run Query". All reports (Raw Excel, Analysis Excel, PDF) are generated from the stored responses and cost nothing to download.
+
+**Can I download reports later?**
+Yes. As long as the query exists in the database, all 3 report types can be downloaded anytime. Reports are generated on-the-fly from stored data.
+
+**What if I only have one API key?**
+That's fine. You only need keys for the platforms you want to use. Select just that platform when running a query.
+
+**What if a user doesn't have an API key?**
+The system falls back to admin-configured keys. If neither the user nor any admin has a key for a provider, that provider is skipped.
+
+**Do I need both client and competitor brands for analysis?**
+Yes. The "Analyze" button and analysis reports require both client brands and competitor brands to be configured on the query.
+
+**Can I add brands to an existing query?**
+Yes. Edit the query and add client/competitor brands, then click "Analyze". For queries created before the brand feature, update via MongoDB:
+```javascript
+db.queries.updateOne(
+  { _id: ObjectId("your-query-id") },
+  { $set: {
+    clientName: "YourCompany",
+    clientBrands: ["Brand1", "Brand2"],
+    competitorBrands: ["Comp1", "Comp2"]
+  }}
+);
+```
+
+---
+
+## License
 
 MIT
 

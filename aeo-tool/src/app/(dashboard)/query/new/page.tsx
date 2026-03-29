@@ -86,7 +86,7 @@ export default function NewQueryPage() {
   return (
     <div className="max-w-3xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#1b4332]">New Query</h1>
+        <h1 className="text-3xl font-bold text-[#1b4332]">New Report</h1>
         <p className="text-[#6b7280] mt-1">Enter your questions to audit across AI platforms</p>
       </div>
 
@@ -213,7 +213,7 @@ export default function NewQueryPage() {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 4v16m8-8H4" />
               </svg>
-              Create Query
+              Create Report
             </>
           )}
         </button>
