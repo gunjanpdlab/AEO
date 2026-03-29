@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["mongoose", "bcryptjs", "@google/generative-ai", "chartjs-node-canvas", "chart.js"],
+  serverExternalPackages: ["mongoose", "bcryptjs", "@google/generative-ai"],
 };
 
 export default nextConfig;

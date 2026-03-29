@@ -2,16 +2,6 @@ import { ChartConfiguration } from 'chart.js';
 import { AnalysisResult, ChartSet } from './types';
 import { CLIENT_COLORS, COMPETITOR_COLORS } from './constants';
 
-let ChartJSNodeCanvas: any;
-
-async function getRenderer(width = 800, height = 500) {
-  if (!ChartJSNodeCanvas) {
-    const mod = await import('chartjs-node-canvas');
-    ChartJSNodeCanvas = mod.ChartJSNodeCanvas;
-  }
-  return new ChartJSNodeCanvas({ width, height, backgroundColour: 'white' });
-}
-
 function getBrandColors(clientCount: number, compCount: number) {
   const cColors = CLIENT_COLORS.slice(0, clientCount);
   const compColors = COMPETITOR_COLORS.slice(0, compCount);
@@ -19,8 +9,20 @@ function getBrandColors(clientCount: number, compCount: number) {
 }
 
 async function renderChart(config: ChartConfiguration, w = 800, h = 500): Promise<string> {
-  const renderer = await getRenderer(w, h);
-  const buffer = await renderer.renderToBuffer(config as any);
+  const chartConfig = JSON.stringify(config);
+  const res = await fetch('https://quickchart.io/chart', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chart: chartConfig,
+      width: w,
+      height: h,
+      backgroundColor: 'white',
+      format: 'png',
+    }),
+  });
+  if (!res.ok) throw new Error(`QuickChart error: ${res.status}`);
+  const buffer = Buffer.from(await res.arrayBuffer());
   return `data:image/png;base64,${buffer.toString('base64')}`;
 }
 
@@ -113,7 +115,7 @@ async function topRecommendationsPieChart(result: AnalysisResult): Promise<strin
 }
 
 async function presenceByCategoryChart(result: AnalysisResult): Promise<string> {
-  const { categoryMetrics, brandMetrics, config } = result;
+  const { categoryMetrics, config } = result;
   const allBrands = [...config.clientBrands, ...config.competitorBrands];
   const colors = getBrandColors(config.clientBrands.length, config.competitorBrands.length);
   return renderChart({
