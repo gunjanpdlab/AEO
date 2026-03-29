@@ -83,11 +83,11 @@ The app comes with two pre-configured accounts:
 
 | Feature | Admin | User |
 |---------|:-----:|:----:|
-| Create & run queries | Yes | Yes |
-| Configure own API keys | Yes | Yes |
+| Create & run reports | Yes | Yes |
 | View analysis dashboard | Yes | Yes |
 | Download Raw Excel | Yes | Yes |
 | Download Analysis Excel & PDF | Yes | Yes |
+| Configure platform API keys | Yes | No |
 | Manage users (create/edit/delete) | Yes | No |
 | Change user roles | Yes | No |
 
@@ -111,7 +111,7 @@ Supported countries include: United States, United Kingdom, Canada, Australia, G
 ### Prerequisites
 - Node.js 18+
 - MongoDB Atlas account (free tier works)
-- API keys for the platforms you want to use
+- API keys for AI platforms (configured by admin, not by end users)
 
 ### 1. Clone & Install
 
@@ -151,9 +151,18 @@ This creates the default **admin** and **user** accounts. Then log in at [http:/
 
 ---
 
-## API Keys Setup
+## API Keys Setup (Admin Only)
 
-After logging in, go to **API Settings** in the sidebar to configure your API keys:
+API keys are managed by platform admins — **end users do not need to configure any API keys**. Users simply create reports and run queries using the platform-provided keys.
+
+### How It Works
+
+- **Admins** configure API keys via the **API Settings** page in the sidebar
+- All users automatically use the admin-configured keys when running queries
+- Only platforms with configured keys are shown to users in the platform selector
+- A **credit-based usage system** will be added in a future release to manage and track usage per user
+
+### Where to Get API Keys (for admins)
 
 | Platform | Where to Get the Key |
 |----------|---------------------|
@@ -162,9 +171,6 @@ After logging in, go to **API Settings** in the sidebar to configure your API ke
 | **Perplexity** | [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api) |
 | **SerpAPI** | [serpapi.com/manage-api-key](https://serpapi.com/manage-api-key) |
 
-- API keys are stored **per-user** in MongoDB
-- You only need keys for the platforms you want to use
-- **Admin fallback**: If a user doesn't have a key for a provider, the system falls back to any admin's key for that provider
 - Click **"Validate Keys"** to test all configured keys against each provider's API
 
 ---
@@ -173,17 +179,13 @@ After logging in, go to **API Settings** in the sidebar to configure your API ke
 
 ### Step-by-Step Workflow
 
-1. **Log in** with admin or user credentials
-2. **Configure API keys** in Settings (sidebar)
-3. **Validate API keys** - click "Validate Keys" to confirm each key works
-4. **Create a New Query** - set title, target country, and add questions (type manually or upload CSV/Excel)
-5. **Configure Brands** - set client name, client brands, and competitor brands for tracking
-6. **Select Platforms** - choose which AI platforms to query (ChatGPT, Gemini, Perplexity, Google AI Overview)
-7. **Run Query** - click "Run Query" and wait for all platforms to respond
-8. **View Results** - expand each question to see side-by-side responses from all platforms
-9. **Download Raw Data** - click "Excel" to export raw responses as a spreadsheet
-10. **Analyze** - click "Analyze" to open the AEO analysis dashboard (requires both client and competitor brands)
-11. **Download Reports** - from the analysis dashboard, export Analysis Excel (11 sheets) or PDF Audit Report
+1. **Log in** with your credentials
+2. **Create a New Report** - set title, target country, configure brands, add questions, and select platforms
+3. **Click "Create & Run Report"** - the report is created and AI platforms are queried automatically in one step
+4. **View Results** - expand each question to see side-by-side responses from all platforms (auto-refreshes while running)
+5. **Download Raw Data** - click "Excel" to export raw responses as a spreadsheet
+6. **Analyze** - click "Analyze" to open the AEO analysis dashboard (requires both client and competitor brands)
+7. **Download Reports** - from the analysis dashboard, export Analysis Excel (11 sheets) or PDF Audit Report
 
 ### Example Test Query
 
@@ -444,17 +446,15 @@ Reports are generated on-the-fly from stored responses. They do **not** re-call 
 ## Data Flow
 
 1. **User Login** - JWT session via NextAuth
-2. **Create Query** - stored in MongoDB with draft status
-3. **Configure Brands** - set client and competitor brands for tracking
-4. **Select Platforms** - choose OpenAI, Gemini, Perplexity, SerpAPI
-5. **Run Query** - concurrent API calls to all selected platforms
-6. **Store Responses** - each platform's response saved to MongoDB
-7. **Parse Analysis** - extract brand mentions, sentiment, citations, rankings
-8. **Calculate Metrics** - brand metrics, gap analysis, category/funnel breakdowns
-9. **Generate Charts** - 12 chart images rendered server-side via Chart.js
-10. **Export Reports** - Analysis Excel (11 sheets) or PDF Audit Report (~10 pages)
+2. **Create & Run Report** - user fills in title, country, brands, questions, selects platforms, and clicks "Create & Run Report"
+3. **Query AI Platforms** - concurrent API calls to all selected platforms using admin-configured keys
+4. **Store Responses** - each platform's response saved to MongoDB
+5. **Parse Analysis** - extract brand mentions, sentiment, citations, rankings
+6. **Calculate Metrics** - brand metrics, gap analysis, category/funnel breakdowns
+7. **Generate Charts** - 12 chart images rendered server-side via Chart.js
+8. **Export Reports** - Analysis Excel (11 sheets) or PDF Audit Report (~10 pages)
 
-API costs are incurred **only in step 5** (Run Query). All subsequent analysis, chart generation, and report downloads use the stored responses and are free.
+API costs are incurred **only in step 3** (Query AI Platforms). All subsequent analysis, chart generation, and report downloads use the stored responses and are free. A credit-based system will be added to track and manage per-user usage.
 
 ---
 
@@ -546,23 +546,26 @@ aeo-tool/
 
 ## FAQ
 
+**Do I need to set up API keys as a user?**
+No. API keys are configured by platform admins. Users simply create reports and the platform handles all AI API calls using admin-configured keys.
+
+**Will there be usage limits?**
+A credit-based usage system is planned for a future release to track and manage per-user usage.
+
 **Do I need a VPN for different country queries?**
 No. The country is passed to AI platforms via the API (in the prompt or as a parameter). Your physical location doesn't matter.
 
 **Do report downloads re-call AI APIs? Will it cost me?**
-No. AI APIs are only called once when you click "Run Query". All reports (Raw Excel, Analysis Excel, PDF) are generated from the stored responses and cost nothing to download.
+No. AI APIs are only called once when you click "Create & Run Report". All reports (Raw Excel, Analysis Excel, PDF) are generated from the stored responses and cost nothing to download.
 
 **Can I download reports later?**
-Yes. As long as the query exists in the database, all 3 report types can be downloaded anytime. Reports are generated on-the-fly from stored data.
+Yes. As long as the report exists in the database, all 3 report types can be downloaded anytime. Reports are generated on-the-fly from stored data.
 
-**What if I only have one API key?**
-That's fine. You only need keys for the platforms you want to use. Select just that platform when running a query.
-
-**What if a user doesn't have an API key?**
-The system falls back to admin-configured keys. If neither the user nor any admin has a key for a provider, that provider is skipped.
+**Which platforms are available to me?**
+Only platforms with admin-configured API keys are shown in the platform selector. If you don't see a platform, ask your admin to configure the key.
 
 **Do I need both client and competitor brands for analysis?**
-Yes. The "Analyze" button and analysis reports require both client brands and competitor brands to be configured on the query.
+Yes. The "Analyze" button and analysis reports require both client brands and competitor brands to be configured on the report.
 
 **Can I add brands to an existing query?**
 Yes. Edit the query and add client/competitor brands, then click "Analyze". For queries created before the brand feature, update via MongoDB:
