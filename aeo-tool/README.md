@@ -48,7 +48,9 @@ This tool lets you:
 | **Password Hashing** | bcryptjs | 3.0.3 |
 | **Excel Generation** | ExcelJS | 4.4.0 |
 | **PDF Generation** | jsPDF + jspdf-autotable | 4.2.0 / 5.0.7 |
-| **Chart Rendering** | Chart.js + chartjs-node-canvas | 4.5.1 / 5.0.0 |
+| **Chart Rendering** | Chart.js + QuickChart.io API | 4.5.1 |
+| **Client Charts** | react-chartjs-2 | 5.3.1 |
+| **Country Flags** | flagcdn.com | CDN (no package) |
 | **AI: OpenAI** | openai SDK (GPT-4o) | 6.25.0 |
 | **AI: Google** | @google/generative-ai (Gemini 2.0 Flash) | 0.24.1 |
 | **AI: Perplexity** | OpenAI-compatible SDK (Sonar Pro) | via openai SDK |
@@ -225,6 +227,10 @@ What are the top AI tools for business?
 
 The analysis module provides deep AEO auditing for brand visibility, competitive positioning, and content optimization opportunities.
 
+### Multi-Platform Analysis
+
+The analysis engine combines responses from **all platforms that returned results**. If you queried ChatGPT, Gemini, and SerpAPI but Gemini failed, the analysis uses only ChatGPT and SerpAPI data. Failed platforms are automatically excluded from analysis, reports, and charts. The source line shows exactly which platforms contributed data (e.g., "ChatGPT, Google AI Overview").
+
 ### Brand Configuration
 
 When creating a query, configure:
@@ -244,19 +250,22 @@ After running a query, click **"Analyze"** on the query detail page. The dashboa
 - Critical Gaps (competitor-only queries)
 - Average Composite Score (0-100)
 
-**12 Charts:**
-1. Brand Presence in AI Responses
-2. Total Mention Volume
-3. URL Citation Count by Brand
-4. Top Recommendation Distribution (doughnut)
-5. Brand Presence by Question Category (grouped bar)
-6. Brand Visibility Across Buyer Journey (grouped bar)
-7. Sentiment Distribution by Brand (stacked horizontal bar)
-8. Brand AEO Scorecard (radar)
-9. Client vs. Competitor Mention Volume Share (doughnut)
-10. Competitive Gap Analysis Summary
-11. Mention-to-Citation Conversion Rate
-12. Average First-Mention Rank Position
+**12 Charts** (each with title and explanation on the dashboard):
+
+| # | Chart | What It Shows |
+|---|-------|---------------|
+| 1 | Brand Presence | % of queries where each brand was mentioned — higher = better visibility |
+| 2 | Total Mention Volume | Total times each brand was mentioned across all responses |
+| 3 | URL Citations | How often AI platforms linked directly to each brand's website |
+| 4 | Top Recommendation Distribution | Which brands are positioned as the #1 recommendation (doughnut) |
+| 5 | Brand Presence by Category | Brand visibility across query types (Best/Discovery, How-to, Trust, etc.) |
+| 6 | Buyer Journey Funnel | Brand presence at each funnel stage: Awareness, Consideration, Decision, Post-Purchase |
+| 7 | Sentiment Distribution | Positive/Neutral/Negative sentiment for each brand (stacked bar) |
+| 8 | Brand AEO Scorecard | Radar chart comparing brands across 6 dimensions |
+| 9 | Client vs Competitor SOV | Share of total mention volume — your brands vs competitors (doughnut) |
+| 10 | Competitive Gap Analysis | Queries categorized by gap type — Critical gaps are priority opportunities |
+| 11 | Mention-to-Citation Conversion | When mentioned, how often does AI also link to the brand's website? |
+| 12 | Average First-Mention Rank | Where brands typically appear first — lower rank = more prominent position |
 
 **Data Tables:**
 - Brand Comparison (sortable by composite score)
