@@ -125,6 +125,7 @@ export async function POST(
           );
         })
         .catch(async (err) => {
+          console.error(`[AEO] ${provider} error for Q${qi}:`, err);
           await Query.updateOne(
             { _id: id, "questions._id": question._id },
             {
