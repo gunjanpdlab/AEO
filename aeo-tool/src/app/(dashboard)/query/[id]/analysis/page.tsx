@@ -316,9 +316,13 @@ export default function AnalysisPage() {
           {/* Row 1: Presence + Mentions */}
           <div className="grid grid-cols-2 gap-4">
             <div className="card p-4">
+              <h3 className="text-sm font-bold text-[#1b4332] mb-1">Brand Presence</h3>
+              <p className="text-xs text-[#6b7280] mb-3">Percentage of queries where each brand was mentioned by AI platforms. Higher presence means better visibility.</p>
               <img src={charts.brandPresence} alt="Brand Presence" className="w-full" />
             </div>
             <div className="card p-4">
+              <h3 className="text-sm font-bold text-[#1b4332] mb-1">Total Mention Volume</h3>
+              <p className="text-xs text-[#6b7280] mb-3">Total number of times each brand was mentioned across all responses. More mentions indicate stronger brand recognition by AI.</p>
               <img src={charts.totalMentions} alt="Total Mentions" className="w-full" />
             </div>
           </div>
@@ -326,9 +330,13 @@ export default function AnalysisPage() {
           {/* Row 2: Citations + Top Recs */}
           <div className="grid grid-cols-2 gap-4">
             <div className="card p-4">
+              <h3 className="text-sm font-bold text-[#1b4332] mb-1">URL Citations</h3>
+              <p className="text-xs text-[#6b7280] mb-3">Number of times AI platforms linked directly to each brand's website. Direct citations drive referral traffic.</p>
               <img src={charts.urlCitations} alt="URL Citations" className="w-full" />
             </div>
             <div className="card p-4">
+              <h3 className="text-sm font-bold text-[#1b4332] mb-1">Top Recommendation Distribution</h3>
+              <p className="text-xs text-[#6b7280] mb-3">Shows which brands are positioned as the #1 recommendation by AI platforms. Being listed first drives the most clicks.</p>
               <img src={charts.topRecommendationsPie} alt="Top Recommendations" className="w-full" />
             </div>
           </div>
@@ -336,9 +344,13 @@ export default function AnalysisPage() {
           {/* Row 3: SOV + Gaps */}
           <div className="grid grid-cols-2 gap-4">
             <div className="card p-4">
+              <h3 className="text-sm font-bold text-[#1b4332] mb-1">Client vs Competitor Share of Voice</h3>
+              <p className="text-xs text-[#6b7280] mb-3">How much of the total brand mention volume belongs to your brands vs competitors. Larger share = more dominance in AI responses.</p>
               <img src={charts.clientVsCompetitorSov} alt="Client vs Competitor SOV" className="w-full" />
             </div>
             <div className="card p-4">
+              <h3 className="text-sm font-bold text-[#1b4332] mb-1">Competitive Gap Analysis</h3>
+              <p className="text-xs text-[#6b7280] mb-3">Categorizes queries by gap type. Critical gaps are where competitors appear but your brand is completely absent — these are priority opportunities.</p>
               <img src={charts.competitiveGaps} alt="Competitive Gaps" className="w-full" />
             </div>
           </div>
@@ -346,9 +358,13 @@ export default function AnalysisPage() {
           {/* Row 4: Conversion + Rank */}
           <div className="grid grid-cols-2 gap-4">
             <div className="card p-4">
+              <h3 className="text-sm font-bold text-[#1b4332] mb-1">Mention-to-Citation Conversion</h3>
+              <p className="text-xs text-[#6b7280] mb-3">When a brand is mentioned, how often does the AI also link to its website? Higher conversion means AI trusts and promotes the brand's content.</p>
               <img src={charts.mentionToCitation} alt="Mention to Citation" className="w-full" />
             </div>
             <div className="card p-4">
+              <h3 className="text-sm font-bold text-[#1b4332] mb-1">Average First-Mention Rank</h3>
+              <p className="text-xs text-[#6b7280] mb-3">Where each brand typically appears first in AI responses. Lower rank (closer to 1) means the brand is mentioned earlier and more prominently.</p>
               <img src={charts.avgRankPosition} alt="Average Rank" className="w-full" />
             </div>
           </div>
@@ -356,18 +372,26 @@ export default function AnalysisPage() {
           {/* Row 5: Sentiment + Scorecard */}
           <div className="grid grid-cols-2 gap-4">
             <div className="card p-4">
+              <h3 className="text-sm font-bold text-[#1b4332] mb-1">Sentiment Distribution</h3>
+              <p className="text-xs text-[#6b7280] mb-3">How AI platforms talk about each brand — positive, neutral, or negative sentiment. Based on language analysis of the surrounding context.</p>
               <img src={charts.sentimentDistribution} alt="Sentiment" className="w-full" />
             </div>
             <div className="card p-4">
+              <h3 className="text-sm font-bold text-[#1b4332] mb-1">Brand AEO Scorecard</h3>
+              <p className="text-xs text-[#6b7280] mb-3">Radar chart comparing brands across 6 dimensions: Presence, Citation, Sentiment, Top Recommendation, Mention Depth, and First-Mention Rate.</p>
               <img src={charts.brandScorecard} alt="Scorecard" className="w-full" />
             </div>
           </div>
 
           {/* Row 6: Category + Funnel (full width) */}
           <div className="card p-4">
+            <h3 className="text-sm font-bold text-[#1b4332] mb-1">Brand Presence by Question Category</h3>
+            <p className="text-xs text-[#6b7280] mb-3">Shows brand visibility across different query types (Best/Discovery, How-to, Trust, Comparison, etc.). Reveals which topics each brand dominates or is missing from.</p>
             <img src={charts.presenceByCategory} alt="Presence by Category" className="w-full" />
           </div>
           <div className="card p-4">
+            <h3 className="text-sm font-bold text-[#1b4332] mb-1">Brand Visibility Across Buyer Journey</h3>
+            <p className="text-xs text-[#6b7280] mb-3">Maps brand presence to the buyer funnel stages: Awareness, Consideration, Decision, and Post-Purchase. Shows where brands appear at each stage of the customer journey.</p>
             <img src={charts.funnelAnalysis} alt="Funnel Analysis" className="w-full" />
           </div>
         </div>
