@@ -35,29 +35,39 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     totalQuestions: 0,
   };
 
-  // Collect unique questions with their first completed response
+  const PROVIDER_LABELS: Record<string, string> = {
+    openai: "ChatGPT",
+    gemini: "Gemini",
+    perplexity: "Perplexity",
+    serpapi: "Google AI Overview",
+  };
+
+  // Collect all completed responses across all providers
   const questionsWithResponses: Array<{ text: string; responseText: string; provider: string }> = [];
+  const allProviders = new Set<string>();
   for (const q of query.questions) {
-    const completed = q.responses.find((r: any) => r.status === 'completed' && r.text);
-    if (completed) {
-      questionsWithResponses.push({
-        text: q.text,
-        responseText: completed.text,
-        provider: completed.provider,
-      });
-      if (!config.platform) config.platform = completed.provider;
+    for (const r of q.responses) {
+      if (r.status === 'completed' && r.text) {
+        questionsWithResponses.push({
+          text: q.text,
+          responseText: r.text,
+          provider: r.provider,
+        });
+        allProviders.add(r.provider);
+      }
     }
   }
 
-  config.totalQuestions = questionsWithResponses.length;
+  // Count unique questions that have at least one completed response
+  const questionsWithAny = new Set(questionsWithResponses.map(q => q.text));
+  config.totalQuestions = questionsWithAny.size;
 
   if (questionsWithResponses.length === 0) {
     return NextResponse.json({ error: "No completed responses found. Run the query first." }, { status: 400 });
   }
 
-  // Detect platform from responses
-  const providers = new Set(questionsWithResponses.map(q => q.provider));
-  config.platform = [...providers].join(', ');
+  // Build platform label from all providers that returned responses
+  config.platform = [...allProviders].map(p => PROVIDER_LABELS[p] || p).join(', ');
 
   const parsedData = parseAllResponses(questionsWithResponses, config);
   const analysis = computeAnalysis(parsedData, config);
