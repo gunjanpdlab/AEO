@@ -304,6 +304,11 @@ export default function AnalysisPage() {
       </div>
 
       {/* Charts Grid */}
+      {!charts && (
+        <div className="card p-6 mb-6 bg-yellow-50 border border-yellow-200">
+          <p className="text-sm text-yellow-800 font-medium">Charts could not be generated on the server. Download the PDF or Excel report for full visual analysis.</p>
+        </div>
+      )}
       {charts && (
         <div className="space-y-6 mb-6">
           <h2 className="text-lg font-bold text-[#1b4332]">Visual Analysis</h2>
