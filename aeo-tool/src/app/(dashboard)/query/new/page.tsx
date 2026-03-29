@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { COUNTRIES, getFlag } from "@/lib/countries";
 
@@ -27,11 +27,26 @@ export default function NewQueryPage() {
   const [clientBrandsText, setClientBrandsText] = useState("");
   const [competitorBrandsText, setCompetitorBrandsText] = useState("");
   const [questionsText, setQuestionsText] = useState("");
-  const [selectedProviders, setSelectedProviders] = useState<string[]>(["openai", "gemini"]);
+  const [selectedProviders, setSelectedProviders] = useState<string[]>([]);
+  const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        const keys = data.apiKeys || {};
+        const admin = data.adminAvailable || {};
+        const available = ["openai", "gemini", "perplexity", "serpapi"].filter(
+          (p) => (keys[p] && keys[p] !== "") || admin[p]
+        );
+        setAvailableProviders(available);
+        setSelectedProviders(available);
+      });
+  }, []);
 
   const handleCountryChange = (code: string) => {
     const c = COUNTRIES.find((c) => c.code === code);
@@ -243,35 +258,44 @@ export default function NewQueryPage() {
 
         <div className="card p-6">
           <label className="block text-sm font-semibold text-[#1b4332] mb-3">Select Platforms to Query</label>
-          <div className="flex flex-wrap gap-3">
-            {Object.entries(PROVIDER_LABELS).map(([key, label]) => {
-              const selected = selectedProviders.includes(key);
-              const colors = PROVIDER_COLORS[key];
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => toggleProvider(key)}
-                  className="px-4 py-2 rounded-xl font-medium text-sm transition-all border-2"
-                  style={{
-                    backgroundColor: selected ? colors.bg : "white",
-                    color: selected ? colors.text : "#6b7280",
-                    borderColor: selected ? colors.text : "#e5e7eb",
-                  }}
-                >
-                  {selected && (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="inline mr-1">
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                  )}
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-          <p className="text-xs text-[#6b7280] mt-2">
-            Selected platforms will be queried immediately after creating the report.
-          </p>
+          {availableProviders.length === 0 ? (
+            <p className="text-sm text-[#e65100] bg-[#fff3e0] p-3 rounded-lg">
+              No API keys configured. Go to <a href="/settings" className="underline font-medium">API Settings</a> to add your keys.
+            </p>
+          ) : (
+            <>
+              <div className="flex flex-wrap gap-3">
+                {availableProviders.map((key) => {
+                  const label = PROVIDER_LABELS[key];
+                  const selected = selectedProviders.includes(key);
+                  const colors = PROVIDER_COLORS[key];
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => toggleProvider(key)}
+                      className="px-4 py-2 rounded-xl font-medium text-sm transition-all border-2"
+                      style={{
+                        backgroundColor: selected ? colors.bg : "white",
+                        color: selected ? colors.text : "#6b7280",
+                        borderColor: selected ? colors.text : "#e5e7eb",
+                      }}
+                    >
+                      {selected && (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="inline mr-1">
+                          <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                      )}
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-[#6b7280] mt-2">
+                Selected platforms will be queried immediately after creating the report.
+              </p>
+            </>
+          )}
         </div>
 
         <button type="submit" disabled={loading} className="btn-primary">

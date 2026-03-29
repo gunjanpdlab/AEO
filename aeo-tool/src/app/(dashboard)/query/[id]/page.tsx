@@ -49,9 +49,8 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
   const [query, setQuery] = useState<QueryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
-  const [selectedProviders, setSelectedProviders] = useState<string[]>([
-    "openai", "gemini", "perplexity", "serpapi",
-  ]);
+  const [selectedProviders, setSelectedProviders] = useState<string[]>([]);
+  const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(null);
 
   const fetchQuery = () => {
@@ -65,6 +64,17 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     fetchQuery();
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        const keys = data.apiKeys || {};
+        const admin = data.adminAvailable || {};
+        const available = ["openai", "gemini", "perplexity", "serpapi"].filter(
+          (p) => (keys[p] && keys[p] !== "") || admin[p]
+        );
+        setAvailableProviders(available);
+        setSelectedProviders(available);
+      });
   }, [id]);
 
   // Poll for updates while query is running
@@ -186,7 +196,8 @@ export default function QueryDetailPage({ params }: { params: Promise<{ id: stri
       <div className="card p-6 mb-6">
         <h3 className="font-semibold text-[#1b4332] mb-3">Select Platforms to Query</h3>
         <div className="flex flex-wrap gap-3 mb-4">
-          {Object.entries(PROVIDER_LABELS).map(([key, label]) => {
+          {availableProviders.map((key) => {
+            const label = PROVIDER_LABELS[key];
             const selected = selectedProviders.includes(key);
             const colors = PROVIDER_COLORS[key];
             return (
